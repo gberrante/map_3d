@@ -197,11 +197,9 @@ pub fn get_radius_normal(lat: f64)->f64 {
     let (major,_,_,squared_eccentricity) = wgs84();
     major/((1.0-squared_eccentricity*lat.sin()*lat.sin()).sqrt())
 }
-
 pub fn deg2rad(x: f64) -> f64 {
     x/180.0*std::f64::consts::PI
 }
-
 pub fn rad2deg(x: f64) -> f64 {
     x*180.0/std::f64::consts::PI
 }
@@ -283,7 +281,7 @@ mod tests {
         let eref = 1.862775208168244e+02;
         let nref = 2.868422278521820e+02;
         let uref = 9.396926207845534e+02;
-        
+
         let (e,n,u) = geodetic2enu(lat, lon, alt, lat0, lon0, alt0);
 
         assert!((e-eref).abs()<1e-3);
