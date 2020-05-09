@@ -202,12 +202,36 @@ pub fn deg2rad(x: f64) -> f64 {
     x/180.0*std::f64::consts::PI
 }
 
+pub fn rad2deg(x: f64) -> f64 {
+    x*180.0/std::f64::consts::PI
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
-    fn test_geodetic() {
+    fn test_deg2rad() {
+        assert!((deg2rad(0.0)-0.0).abs()<1e-4);
+        assert!((deg2rad(90.0)-std::f64::consts::PI/2.0).abs()<1e-4);
+        assert!((deg2rad(-90.0)+std::f64::consts::PI/2.0).abs()<1e-4);
+        assert!((deg2rad(45.0)-std::f64::consts::PI/4.0).abs()<1e-4);
+        assert!((deg2rad(270.0)-std::f64::consts::PI*6.0/4.0).abs()<1e-4);
+        assert!((deg2rad(360.0)-std::f64::consts::PI*2.0).abs()<1e-4);
+    }
+
+    #[test]
+    fn test_rad2deg() {
+        assert!((0.0-rad2deg(0.0)).abs()<1e-4);
+        assert!((90.0-rad2deg(std::f64::consts::PI/2.0)).abs()<1e-4);
+        assert!((-90.0+rad2deg(std::f64::consts::PI/2.0)).abs()<1e-4);
+        assert!((45.0-rad2deg(std::f64::consts::PI/4.0)).abs()<1e-4);
+        assert!((270.0-rad2deg(std::f64::consts::PI*6.0/4.0)).abs()<1e-4);
+        assert!((360.0-rad2deg(std::f64::consts::PI*2.0)).abs()<1e-4);
+    }
+
+    #[test]
+    fn test_geodetic2ecef() {
 
         let lat = deg2rad(30.14988205);
         let lon = deg2rad(91.38733072);
@@ -222,10 +246,50 @@ mod tests {
         assert!((x-xref).abs()<1e-3);
         assert!((y-yref).abs()<1e-3);
         assert!((z-zref).abs()<1e-3);
-
-
     }
 
+    #[test]
+    fn test_geodetic2aer() {
+        
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+
+        let lat = deg2rad(42.002581974253744);
+        let lon = deg2rad(-81.997751960067460);
+        let alt = 1.139701799575106e+03;
+        
+        let azref = deg2rad(32.999999999989740);
+        let elref = deg2rad(69.999999999945540);
+        let rangeref = 1000.0;
+
+        let (a,e,r) = geodetic2aer(lat, lon, alt, lat0, lon0, alt0);
+
+        assert!((a-azref).abs()<1e-3);
+        assert!((e-elref).abs()<1e-3);
+        assert!((r-rangeref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_geodetic2enu() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+
+        let lat = deg2rad(42.002581974253744);
+        let lon = deg2rad(-81.997751960067460);
+        let alt = 1.139701799575106e+03;
+
+        let eref = 1.862775208168244e+02;
+        let nref = 2.868422278521820e+02;
+        let uref = 9.396926207845534e+02;
+        
+        let (e,n,u) = geodetic2enu(lat, lon, alt, lat0, lon0, alt0);
+
+        assert!((e-eref).abs()<1e-3);
+        assert!((n-nref).abs()<1e-3);
+        assert!((u-uref).abs()<1e-3);
+    }
 
     
 }
