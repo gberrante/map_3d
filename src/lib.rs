@@ -419,6 +419,82 @@ mod tests {
         assert!((lon-lonref).abs()<1e-8);
         assert!((alt-altref).abs()<1e-8);
     }
+    
+    #[test]
+    fn test_ecef2geodetic() {
+        let latref = deg2rad(30.14988205);
+        let lonref = deg2rad(91.38733072);
+        let altref = 4031.0;
+
+        let (x,y,z) = geodetic2ecef(latref, lonref, altref);
+        let (lat,lon,alt) = ecef2geodetic(x, y, z);
+        
+        assert!((lat-latref).abs()<1e-8);
+        assert!((lon-lonref).abs()<1e-8);
+        assert!((alt-altref).abs()<1e-8);
+
+        let (x,y,z) = geodetic2ecef(latref, lonref, altref-5000.0);
+        let (lat,lon,alt) = ecef2geodetic(x, y, z);
+        
+        assert!((lat-latref).abs()<1e-8);
+        assert!((lon-lonref).abs()<1e-8);
+        assert!((alt-(altref-5000.0)).abs()<1e-8);
+    }
+
+    #[test]
+    fn test_ecef2enu() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+        let eref = 1.862775210000000e+02;
+        let nref = 2.868422200000000e+02;
+        let uref = 9.396926200000000e+02;
+        
+        let (x,y,z) = enu2ecef(eref, nref, uref, lat0, lon0, alt0);
+        let (e,n,u)= ecef2enu(x, y, z, lat0, lon0, alt0);
+
+        assert!((e-eref).abs()<1e-3);
+        assert!((n-nref).abs()<1e-3);
+        assert!((u-uref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_ecef2aer() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+
+        let azref = deg2rad(33.0);
+        let elref = deg2rad(70.0);
+        let rangeref = 1000.0;
+
+        let (x,y,z) = aer2ecef(azref, elref, rangeref, lat0, lon0, alt0);
+        let (az,el,range) = ecef2aer(x, y, z, lat0, lon0, alt0);
+
+        assert!((az-azref).abs()<1e-3);
+        assert!((el-elref).abs()<1e-3);
+        assert!((range-rangeref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_eci2aer() {
+        let azref = deg2rad(162.55);
+        let elref = deg2rad(55.12);
+        let rangeref = 384013940.9;
+        let gst = 4.501012562811752;
+
+        let lat0 = deg2rad(28.4);
+        let lon0 = deg2rad(-80.5);
+        let alt0 = 2.7;
+
+        let (x,y,z) = aer2eci(gst, azref, elref, rangeref, lat0, lon0, alt0);
+        let (az,el,range) = eci2aer(gst, x, y, z, lat0, lon0, alt0);
+
+        assert!((az-azref).abs()<1e-3);
+        assert!((el-elref).abs()<1e-3);
+        assert!((range-rangeref).abs()<1e-3);
+    }
+
 }
 
 
