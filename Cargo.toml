@@ -1,10 +1,17 @@
 [package]
 name = "map_3d"
 version = "0.1.0"
-authors = ["gberrante <30345675+gberrante@users.noreply.github.com>"]
+authors = ["Giovan Battista Errante"]
 edition = "2018"
+description = "Library for 3D geographic coordinate transformation"
+license = "Apache-2.0"
 license-file = "LICENSE.txt"
-
+readme = "README.md"
+homepage = "https://github.com/gberrante/map_3d"
+repository = "https://github.com/gberrante/map_3d"
+documentation = ""
+keywords = ["geographic", "map", "3d", "transformation", "coordinate"]
+categories = ["science","science::robotics","mathematics","games"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
