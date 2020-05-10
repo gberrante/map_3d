@@ -8,14 +8,12 @@ pub fn geodetic2ecef(lat: f64, lon: f64, alt: f64) -> (f64,f64,f64){
 
     (x,y,z)
 }
-
 pub fn geodetic2aer(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
     let (e,n,u) = geodetic2enu(lat,lon,alt,lat0,lon0,alt0);
     let (az,el,slant_range) = enu2aer(e, n, u);
 
     (az,el,slant_range)
 }
-
 pub fn geodetic2enu(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
     let (x1,y1,z1) = geodetic2ecef(lat, lon, alt);
     let (x2,y2,z2) = geodetic2ecef(lat0, lon0, alt0);
@@ -34,17 +32,14 @@ pub fn aer2ecef(az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: 
     let (dx,dy,dz) = enu2uvw(e,n,u,lat0,lon0);
     (x0+dx,y0+dy,z0+dz)
 }
-
 pub fn aer2enu(az : f64, el: f64,slant_range :f64) -> (f64,f64,f64){
     let r = slant_range*el.cos();
     (r*az.sin(),r*az.cos(),slant_range*el.sin())
 }
-
 pub fn aer2eci(gst :f64, az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
     let (x1,y1,z1) = aer2ecef(az, el, slant_range, lat0, lon0, alt0);
     ecef2eci(gst, x1, y1, z1)
 }
-
 pub fn aer2geodetic(az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,f64,f64) {
     let (x,y,z) = aer2ecef(az, el, slant_range, lat0, lon0, alt0);
     ecef2geodetic(x,y,z)
@@ -60,7 +55,6 @@ pub fn enu2uvw(et : f64, nt: f64,up :f64, lat0: f64, lon0: f64) -> (f64,f64,f64)
     let w = lat0.sin()*up+lat0.cos()*nt;
     (u,v,w)
 }
-
 pub fn enu2aer(e : f64, n: f64,u :f64) -> (f64,f64,f64){
     let r = (e*e+n*n).sqrt();
 
@@ -71,14 +65,12 @@ pub fn enu2aer(e : f64, n: f64,u :f64) -> (f64,f64,f64){
     (az,el,slant_range)
 
 }
-
 pub fn enu2ecef(e : f64, n: f64,u :f64, lat0: f64, lon0: f64, alt0 : f64) -> (f64,f64,f64){
     let (x0,y0,z0) = geodetic2ecef(lat0, lon0, alt0);
     let (dx,dy,dz) = enu2uvw(e, n, u, lat0, lon0);
 
     (x0+dx,y0+dy,z0+dz)
 }
-
 pub fn enu2ecefv(e : f64, n: f64,u :f64, lat0: f64, lon0: f64) -> (f64,f64,f64){
     let t = lat0.cos() * u - lat0.sin() * n;
     let u = lon0.cos() * t - lon0.sin() * e;
@@ -87,7 +79,6 @@ pub fn enu2ecefv(e : f64, n: f64,u :f64, lat0: f64, lon0: f64) -> (f64,f64,f64){
 
     (u,v,w)
 }
-
 pub fn enu2geodetic(e : f64, n: f64,u :f64, lat0: f64, lon0: f64, alt0 : f64) -> (f64,f64,f64){
     let (x,y,z) = enu2ecef(e, n, u, lat0, lon0, alt0);
     let (lat,lon,alt) = ecef2geodetic(x, y, z);
@@ -367,9 +358,66 @@ mod tests {
 
         let (lat,lon,alt) = aer2geodetic(az, el, slant_range, lat0, lon0, alt0);
 
-        assert!((lat-latref).abs()<1e-3);
-        assert!((lon-lonref).abs()<1e-3);
-        assert!((alt-altref).abs()<1e-3);
+        assert!((lat-latref).abs()<1e-8);
+        assert!((lon-lonref).abs()<1e-8);
+        assert!((alt-altref).abs()<1e-8);
+    }
+
+    #[test]
+    fn test_enu2aer() {
+        let e = 1.862775210000000e+02;
+        let n = 2.868422200000000e+02;
+        let u = 9.396926200000000e+02;
+
+        let azref = deg2rad(33.0);
+        let elref = deg2rad(70.0);
+        let rangeref = 1000.0;
+
+        let (az,el,range) = enu2aer(e, n, u);
+
+        assert!((az-azref).abs()<1e-3);
+        assert!((el-elref).abs()<1e-3);
+        assert!((range-rangeref).abs()<1e-3);        
+    }
+
+    #[test]
+    fn test_enu2ecef() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+        let e = 1.862775210000000e+02;
+        let n = 2.868422200000000e+02;
+        let u = 9.396926200000000e+02;
+
+        let xref = 6.609301927610815e+05;
+        let yref = -4.701424222957011e+06;
+        let zref = 4.246579604632881e+06;
+        
+        let (x,y,z) = enu2ecef(e, n, u, lat0, lon0, alt0);
+
+        assert!((x-xref).abs()<1e-3);
+        assert!((y-yref).abs()<1e-3);
+        assert!((z-zref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_enu2geodetic() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+        let e = 0.0;
+        let n = 0.0;
+        let u = -1.0;
+
+        let latref = deg2rad(41.999999999999993);
+        let lonref = deg2rad(-82.0);
+        let altref = 1.990000000007368e+02;
+
+        let (lat,lon,alt) = enu2geodetic(e, n, u, lat0, lon0, alt0);
+
+        assert!((lat-latref).abs()<1e-8);
+        assert!((lon-lonref).abs()<1e-8);
+        assert!((alt-altref).abs()<1e-8);
     }
 }
 
