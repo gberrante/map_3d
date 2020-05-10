@@ -18,7 +18,7 @@ pub fn geodetic2enu(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64
     let (x1,y1,z1) = geodetic2ecef(lat, lon, alt);
     let (x2,y2,z2) = geodetic2ecef(lat0, lon0, alt0);
 
-    let (e,n,u) = ecef2enuv(x1-x2, y1-y2, z1-z2, lat0, lon0);
+    let (e,n,u) = uvw2enu(x1-x2, y1-y2, z1-z2, lat0, lon0);
 
     (e,n,u)
 } 
@@ -71,14 +71,6 @@ pub fn enu2ecef(e : f64, n: f64,u :f64, lat0: f64, lon0: f64, alt0 : f64) -> (f6
 
     (x0+dx,y0+dy,z0+dz)
 }
-pub fn enu2ecefv(e : f64, n: f64,u :f64, lat0: f64, lon0: f64) -> (f64,f64,f64){
-    let t = lat0.cos() * u - lat0.sin() * n;
-    let u = lon0.cos() * t - lon0.sin() * e;
-    let v = lon0.sin() * t + lon0.cos() * e;
-    let w = lat0.sin() * u + lat0.cos() * n;
-
-    (u,v,w)
-}
 pub fn enu2geodetic(e : f64, n: f64,u :f64, lat0: f64, lon0: f64, alt0 : f64) -> (f64,f64,f64){
     let (x,y,z) = enu2ecef(e, n, u, lat0, lon0, alt0);
     let (lat,lon,alt) = ecef2geodetic(x, y, z);
@@ -93,7 +85,6 @@ pub fn ecef2eci(gst :f64,x: f64, y: f64, z: f64) -> (f64,f64,f64){
     (arr[0],arr[1],arr[2])
 
 }
-
 pub fn ecef2geodetic(x: f64, y: f64, z: f64) -> (f64,f64,f64){
     let major = wgs84().0;
     let minor = wgs84().1;
@@ -127,21 +118,18 @@ pub fn ecef2geodetic(x: f64, y: f64, z: f64) -> (f64,f64,f64){
 
     (lat,lon,alt)
 } 
-
 pub fn ecef2enu(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,f64,f64){
     let (x0,y0,z0) = geodetic2ecef(lat0, lon0, alt0);
-    let (e,n,u) = ecef2enuv(x-x0,y-y0,z-z0,lat0,lon0);
+    let (e,n,u) = uvw2enu(x-x0,y-y0,z-z0,lat0,lon0);
     (e,n,u)
 }
-
-pub fn ecef2enuv(u : f64, v: f64,w :f64, lat0: f64, lon0: f64) -> (f64,f64,f64){
+pub fn uvw2enu(u : f64, v: f64,w :f64, lat0: f64, lon0: f64) -> (f64,f64,f64){
     let t = lon0.cos() * u + lon0.sin() * v;
     let e = -lon0.sin() * u + lon0.cos() * v;
     let n = -lat0.sin() * t + lat0.cos() * w;
     let u = lat0.cos() * t + lat0.sin() * w;
     (e,n,u)
 }
-
 pub fn ecef2aer(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,f64,f64){
     let (e,n,u) = ecef2enu(x, y, z, lat0, lon0, alt0);
     let (az,el,slant_range) = enu2aer(e,n,u);
