@@ -33,5 +33,3 @@ List of coordinates systems implemented in the functions:
 - implement functions for North-East-Down coordinate system
 - implement haversine functions
 - implement functions for right ascension and declination conversions
-
-- create HTML documentation
