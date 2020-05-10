@@ -174,8 +174,8 @@ pub fn eci2ecef(gst :f64,x: f64, y: f64, z: f64)-> (f64,f64,f64){
 // --------------------------------------
 pub fn matmul3(matrix: [f64;9],col:[f64;3])->[f64;3]{
     let out : [f64;3] = [ matrix[0]*col[0]+matrix[1]*col[1]+matrix[2]*col[2],
-                        matrix[2]*col[0]+matrix[3]*col[1]+matrix[4]*col[2],
-                        matrix[5]*col[0]+matrix[6]*col[1]+matrix[7]*col[2]];
+                        matrix[3]*col[0]+matrix[4]*col[1]+matrix[5]*col[2],
+                        matrix[6]*col[0]+matrix[7]*col[1]+matrix[8]*col[2]];
     out
 }
 pub fn r3(x : f64) -> [f64; 9] {
@@ -289,7 +289,88 @@ mod tests {
         assert!((u-uref).abs()<1e-3);
     }
 
-    
+    #[test]
+    fn test_aer2ecef() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+
+        let az = deg2rad(33.0);
+        let el = deg2rad(70.0);
+        let slant_range = 1000.0;
+
+        let (x,y,z) = aer2ecef(az,el,slant_range,lat0,lon0,alt0);
+
+
+        let xref = 6.609301927610816e+05;
+        let yref = -4.701424222957011e+06;
+        let zref = 4.246579604632881e+06;
+
+        assert!((x-xref).abs()<1e-3);
+        assert!((y-yref).abs()<1e-3);
+        assert!((z-zref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_aer2enu() {
+        let az = deg2rad(33.0);
+        let el = deg2rad(70.0);
+        let slant_range = 1000.0;
+
+        let eref = 1.862775208165935e+02;
+        let nref = 2.868422278517140e+02;
+        let uref = 9.396926207859083e+02;
+
+        let (e,n,u)= aer2enu(az, el, slant_range);
+
+        assert!((e-eref).abs()<1e-3);
+        assert!((n-nref).abs()<1e-3);
+        assert!((u-uref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_aer2eci() {
+        let az = deg2rad(162.55);
+        let el = deg2rad(55.12);
+        let slant_range = 384013940.9;
+        let gst = 4.501012562811752;
+
+        let lat0 = deg2rad(28.4);
+        let lon0 = deg2rad(-80.5);
+        let alt0 = 2.7;
+
+        let xref = -3.849714979138141e+08;
+        let yref = -4.836588977863766e+07;
+        let zref = -3.143285462295778e+07;
+
+        let (x,y,z) = aer2eci(gst, az, el, slant_range, lat0, lon0, alt0);
+
+        assert!((x-xref).abs()<1e-3);
+        assert!((y-yref).abs()<1e-3);
+        assert!((z-zref).abs()<1e-3);
+    }
+ 
+    #[test]
+    fn test_aer2geodetic() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+        
+        let az = deg2rad(32.999999999989740);
+        let el = deg2rad(69.999999999945540);
+        let slant_range = 1000.0;
+
+        let latref = deg2rad(42.002581974253744);
+        let lonref = deg2rad(-81.997751960067460);
+        let altref = 1.139701799575106e+03;
+        
+
+        let (lat,lon,alt) = aer2geodetic(az, el, slant_range, lat0, lon0, alt0);
+
+        assert!((lat-latref).abs()<1e-3);
+        assert!((lon-lonref).abs()<1e-3);
+        assert!((alt-altref).abs()<1e-3);
+    }
 }
 
 
