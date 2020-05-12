@@ -1,5 +1,5 @@
 # Rust Map3d
-![crates.io](https://img.shields.io/crates/v/map_3d.svg)
+[![crates.io](https://img.shields.io/crates/v/map_3d.svg)](https://crates.io/crates/map_3d)
 ![Rust](https://github.com/gberrante/map_3d/workflows/Rust/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![codecov](https://codecov.io/gh/gberrante/map_3d/branch/master/graph/badge.svg)](https://codecov.io/gh/gberrante/map_3d)
