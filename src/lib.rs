@@ -443,10 +443,79 @@ pub fn rad2deg(x: f64) -> f64 {
     x*180.0/std::f64::consts::PI
 }
 
+/// Returns the GST time as f64
+/// 
+/// ## Input
+/// UTC time defined as: [year,month,day,hour,minute,second]
+/// 
+/// ## Output
+/// Gst time as f64
+pub fn utc2gst(utc: [i32;6]) -> f64 {
+
+    let mut year = utc[0] as f64;
+    let mut month = utc[1] as f64;
+    let day = utc[2] as f64;
+    let h = utc[3] as f64;
+    let m = utc[4] as f64;
+    let s = utc[5] as f64;
+
+    if month<3.0 {
+        year = year - 1.0;
+        month = year + 12.0;
+    }
+
+    let a = fix(year/100.0);
+
+    let b = 2.0 - a + fix(a/4.0);
+
+    let c = ((s/60.0 + m)/60.0 + h)/24.0;
+    
+    let jd = fix(365.25 * (year + 4716.0)) + fix(30.6001*(month + 1.0)) + day + b - 1524.5 + c;
+    
+    let t_ut1 = (jd - 2451545.0)/36525.0;
+
+    let gmst_sec = 67310.54841 + 3.164400184812866e+09 * t_ut1 + 0.093104 * t_ut1 * t_ut1 
+                        - 6.2e-6 * t_ut1 * t_ut1 * t_ut1;
+    
+    let gst = (gmst_sec * 2.0 * std::f64::consts::PI / 86400.0) % (2.0 * std::f64::consts::PI);
+    gst
+}
+
+/// Return the round toward zero value of the input
+pub fn fix(x : f64) -> f64 {
+    let mut out = x;
+    if out<0.0 {
+        out = x.ceil();
+    } else {
+        out = x.floor();
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    #[test]
+    fn test_utc2gst() {
+
+        let datetime: [i32;6] = [2020,5,12,18,2,10];
+        let gst_ref = 2.469809475597415;
+
+        let gst = utc2gst(datetime);
+
+        assert!( (gst-gst_ref).abs()<1e-8);
+    }
+
+    #[test]
+    fn test_fix() {
+        let x1 = 3.7;
+        let x2 = -4.67;
+
+        assert_eq!(fix(x1),3.0);
+        assert_eq!(fix(x2),-4.0);
+    }
+    
     #[test]
     fn test_deg2rad() {
         assert!((deg2rad(0.0)-0.0).abs()<1e-4);
