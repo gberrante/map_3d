@@ -461,7 +461,7 @@ pub fn utc2gst(utc: [i32;6]) -> f64 {
 
     if month<3.0 {
         year = year - 1.0;
-        month = year + 12.0;
+        month = month + 12.0;
     }
 
     let a = fix(year/100.0);
@@ -505,6 +505,13 @@ mod tests {
         let gst = utc2gst(datetime);
 
         assert!( (gst-gst_ref).abs()<1e-8);
+
+        let datetime2: [i32;6] = [2020,1,12,18,2,10];
+        let gst_ref2 = 0.388271658105431;
+
+        let gst2 = utc2gst(datetime2);
+
+        assert!( (gst2-gst_ref2).abs()<1e-8);
     }
 
     #[test]
