@@ -23,7 +23,7 @@ List of coordinates systems implemented in the functions:
 - [Earth-Centered Inertial](https://en.wikipedia.org/wiki/Earth-centered_inertial) (ECI) 
 - [Local spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system#In_geography) (AER)
 - [Local tangent plane coordinate system - East-North-Up](https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates) (ENU)
-
+- [Local tangent plane coordinate system - North-East-Down](https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates) (NED)
 Additional functions:
 
 - Radians to Degrees and Degrees to Radians
@@ -37,6 +37,5 @@ Additional functions:
 ## To-Do List:
 
 - implement functions for geodetic distances calculation
-- implement functions for North-East-Down coordinate system
 - implement haversine functions
 - implement functions for right ascension and declination conversions

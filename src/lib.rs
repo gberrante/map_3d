@@ -64,6 +64,25 @@ pub fn geodetic2enu(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64
     (e,n,u)
 } 
 
+/// Returns the tuple (north,east,down) of coordinates in the NED system
+/// 
+///  ## Inputs:
+/// - lat = input latitude [rad]
+/// - lon = input longitude [rad]
+/// - alt = input altitude [m]
+/// - lat0 = reference latitude [rad]
+/// - lon0 = reference longitude [rad]
+/// - alt0 = reference altitude [m]
+/// 
+/// ## Outputs:
+/// - n = north coordinate [m] of input geodetic location from reference geodetic location
+/// - e = east coordinate [m] of input geodetic location from reference geodetic location
+/// - d = down coordinate [m] of input geodetic location from reference geodetic location
+pub fn geodetic2ned(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
+    let enu =  geodetic2enu(lat, lon, alt, lat0, lon0, alt0);
+    (enu.1,enu.0,-enu.2)
+}
+
 /// Returns the tuple (x,y,z) of coordinates in the ECEF system
 /// 
 /// ## Inputs:
@@ -89,17 +108,14 @@ pub fn aer2ecef(az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: 
 /// Returns the tuple (east,north,up) of coordinates in the ENU system
 /// 
 /// ## Inputs:
-/// - lat = input latitude [rad]
-/// - lon = input longitude [rad]
-/// - alt = input altitude [m]
-/// - lat0 = reference latitude [rad]
-/// - lon0 = reference longitude [rad]
-/// - alt0 = reference altitude [m]
+/// - az = azimuth angle [rad]
+/// - el = elevation angle [rad]
+/// - slant_range = slant range [m]
 /// 
 /// ## Outputs:
-/// - e = east coordinate [m] of input geodetic location from reference geodetic location
-/// - n = north coordinate [m] of input geodetic location from reference geodetic location
-/// - u = up coordinate [m] of input geodetic location from reference geodetic location
+/// - e = east coordinate [m] of input location from reference geodetic location
+/// - n = north coordinate [m] of input location from reference geodetic location
+/// - u = up coordinate [m] of input location from reference geodetic location
 pub fn aer2enu(az : f64, el: f64,slant_range :f64) -> (f64,f64,f64){
     let r = slant_range*el.cos();
     (r*az.sin(),r*az.cos(),slant_range*el.sin())
@@ -122,6 +138,22 @@ pub fn aer2enu(az : f64, el: f64,slant_range :f64) -> (f64,f64,f64){
 pub fn aer2eci(gst :f64, az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
     let (x1,y1,z1) = aer2ecef(az, el, slant_range, lat0, lon0, alt0);
     ecef2eci(gst, x1, y1, z1)
+}
+
+/// Returns the tuple (north,east,down) of coordinates in the NED system
+/// 
+/// ## Inputs:
+/// - az = azimuth angle [rad]
+/// - el = elevation angle [rad]
+/// - slant_range = slant range [m]
+/// 
+/// ## Outputs:
+/// - n = north coordinate [m] of input location from reference geodetic location
+/// - e = east coordinate [m] of input location from reference geodetic location
+/// - d = down coordinate [m] of input location from reference geodetic location
+pub fn aer2ned(az : f64, el: f64,slant_range :f64) -> (f64,f64,f64){
+    let enu = aer2enu(az, el, slant_range);
+    (enu.1,enu.0,-enu.2)
 }
 
 /// Returns the tuple (latitude,longitude,altitude) of coordinates in the Geodetic system
@@ -171,9 +203,6 @@ pub fn enu2uvw(et : f64, nt: f64,up :f64, lat0: f64, lon0: f64) -> (f64,f64,f64)
 /// - e = east coordinate [m] from reference geodetic location
 /// - n = north coordinate [m] from reference geodetic location
 /// - u = up coordinate [m] from reference geodetic location
-/// - lat0 = reference latitude [rad]
-/// - lon0 = reference longitude [rad]
-/// - alt0 = reference altitude [m]
 /// 
 /// ## Outputs:
 /// - az = azimuth angle [rad] of input location from reference geodetic location
@@ -313,6 +342,25 @@ pub fn ecef2enu(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,
     (e,n,u)
 }
 
+/// Returns the tuple (north,east,down) of coordinates in the NED system
+/// 
+/// ## Inputs:
+/// - x = x ECEF coordinate [m]
+/// - y = y ECEF coordinate [m]
+/// - z = z ECEF coordinate [m]
+/// - lat0 = reference latitude [rad]
+/// - lon0 = reference longitude [rad]
+/// - alt0 = reference altitude [m]
+/// 
+/// ## Outputs:
+/// - n = north coordinate [m] of input location from reference geodetic location
+/// - e = east coordinate [m] of input location from reference geodetic location
+/// - d = down coordinate [m] of input location from reference geodetic location
+pub fn ecef2ned(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,f64,f64){
+    let enu = ecef2enu(x, y, z, lat0, lon0, alt0);
+    (enu.1,enu.0,-enu.2)
+}
+
 /// Returns the tuple (east,north,up) of coordinates in the ENU system
 /// 
 /// ## Inputs:
@@ -390,6 +438,60 @@ pub fn eci2aer(gst :f64,x: f64, y: f64, z: f64, lat :f64, lon :f64, alt :f64)-> 
 pub fn eci2ecef(gst :f64,x: f64, y: f64, z: f64)-> (f64,f64,f64){
     let arr = matmul3(r3(gst),[x,y,z]);
     (arr[0],arr[1],arr[2])
+}
+
+/// Returns the tuple (azimuth,elevation,slant range) of coordinates in the AER system
+/// 
+/// ## Inputs:
+/// - n = north coordinate [m] of input location from reference geodetic location
+/// - e = east coordinate [m] of input location from reference geodetic location
+/// - d = down coordinate [m] of input location from reference geodetic location
+/// 
+/// ## Outputs:
+/// - az = azimuth angle [rad] of input location from reference geodetic location
+/// - el = elevation angle [rad] of input location from reference geodetic location
+/// - slant_range = slant range [m] of input location from reference geodetic location
+pub fn ned2aer(n : f64, e: f64,d :f64) -> (f64,f64,f64){
+    let aer = enu2aer(e, n, -d);
+    aer
+}
+
+/// Returns the tuple (latitude,longitude,altitude) of coordinates in the Geodetic system
+/// 
+/// ## Inputs:
+/// - n = north coordinate [m] of input location from reference geodetic location
+/// - e = east coordinate [m] of input location from reference geodetic location
+/// - d = down coordinate [m] of input location from reference geodetic location
+/// - lat0 = reference latitude [rad]
+/// - lon0 = reference longitude [rad]
+/// - alt0 = reference altitude [m]
+/// 
+/// ## Outputs:
+/// - lat = latitude [rad]
+/// - lon = longitude [rad]
+/// - alt = altitude [m]
+pub fn ned2geodetic(n : f64, e: f64,d :f64, lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
+    let geo = enu2geodetic(e, n, -d, lat0, lon0, alt0);
+    geo
+}
+
+/// Returns the tuple (x,y,z) of coordinates in the ECEF system
+/// 
+/// ## Inputs:
+/// - n = north coordinate [m] from reference geodetic location
+/// - e = east coordinate [m] from reference geodetic location
+/// - d = down coordinate [m] from reference geodetic location
+/// - lat0 = reference latitude [rad]
+/// - lon0 = reference longitude [rad]
+/// - alt0 = reference altitude [m]
+/// 
+/// ## Outputs:
+/// - x = x ECEF coordinate [m]
+/// - y = y ECEF coordinate [m]
+/// - z = z ECEF coordinate [m]
+pub fn ned2ecef(n: f64,e : f64, d :f64, lat0: f64, lon0: f64, alt0 : f64) -> (f64,f64,f64){
+    let ecef = enu2ecef(e, n, -d, lat0, lon0, alt0);
+    ecef
 }
 
 /// Returns the array result of 3-by-3-matrix that multiplies a 3-by-1 column array
