@@ -921,6 +921,116 @@ mod tests {
         assert!((range-rangeref).abs()<1e-3);
     }
 
+    #[test]
+    fn test_ned2geodetic() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+        let e = 0.0;
+        let n = 0.0;
+        let d = 1.0;
+
+        let latref = deg2rad(41.999999999999993);
+        let lonref = deg2rad(-82.0);
+        let altref = 1.990000000007368e+02;
+
+        let (lat,lon,alt) = ned2geodetic(n, e, d, lat0, lon0, alt0);
+
+        assert!((lat-latref).abs()<1e-8);
+        assert!((lon-lonref).abs()<1e-8);
+        assert!((alt-altref).abs()<1e-8);
+    }
+
+    #[test]
+    fn test_geodetic2ned() {
+        let lat = deg2rad(41.999999999999993);
+        let lon = deg2rad(-82.0);
+        let alt = 1.990000000007368e+02;
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+
+        let eref = 0.0;
+        let nref = 0.0;
+        let dref = 1.0;
+
+        let (n,e,d) = geodetic2ned(lat, lon, alt, lat0, lon0, alt0);
+    
+        assert!((e-eref).abs()<1e-3);
+        assert!((n-nref).abs()<1e-3);
+        assert!((d-dref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_aer2ned() {
+        let az = deg2rad(33.0);
+        let el = deg2rad(70.0);
+        let slant_range = 1000.0;
+
+        let eref = 1.862775208165935e+02;
+        let nref = 2.868422278517140e+02;
+        let dref = -9.396926207859083e+02;
+
+        let (n, e, d)= aer2ned(az, el, slant_range);
+
+        assert!((e-eref).abs()<1e-3);
+        assert!((n-nref).abs()<1e-3);
+        assert!((d-dref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_ned2aer() {
+        let az_ref = deg2rad(33.0);
+        let el_ref = deg2rad(70.0);
+        let range_ref = 1000.0;
+
+        let e = 1.862775208165935e+02;
+        let n = 2.868422278517140e+02;
+        let d = -9.396926207859083e+02;
+
+        let (az, el, range) = ned2aer(n, e, d);
+
+        assert!((az-az_ref).abs()<1e-6);
+        assert!((el-el_ref).abs()<1e-6);
+        assert!((range-range_ref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_ned2ecef() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+        let e = 1.862775210000000e+02;
+        let n = 2.868422200000000e+02;
+        let d = -9.396926200000000e+02;
+
+        let xref = 6.609301927610815e+05;
+        let yref = -4.701424222957011e+06;
+        let zref = 4.246579604632881e+06;
+        
+        let (x,y,z) = ned2ecef(n, e, d, lat0, lon0, alt0);
+
+        assert!((x-xref).abs()<1e-3);
+        assert!((y-yref).abs()<1e-3);
+        assert!((z-zref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_ecef2ned() {
+        let lat0 = deg2rad(42.0);
+        let lon0 = deg2rad(-82.0);
+        let alt0 = 200.0;
+        let eref = 1.862775210000000e+02;
+        let nref = 2.868422200000000e+02;
+        let dref = -9.396926200000000e+02;
+        
+        let (x,y,z) = ned2ecef(nref, eref, dref, lat0, lon0, alt0);
+        let (n,e,d)= ecef2ned(x, y, z, lat0, lon0, alt0);
+
+        assert!((e-eref).abs()<1e-3);
+        assert!((n-nref).abs()<1e-3);
+        assert!((d-dref).abs()<1e-3);
+    }
 }
 
 
