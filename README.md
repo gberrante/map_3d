@@ -6,6 +6,8 @@
 
 This is a Rust library for geographic coordinate frame conversion. The implementation is similar to  [Pymap3d](https://github.com/geospace-code/pymap3d). All the functions are implemented in `f64` precision. 
 
+Live demo: [map 3d live demo](https://rustmap-3d.firebaseapp.com/)
+
 No external dependencies
 
 The default units are:
