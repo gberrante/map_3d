@@ -213,7 +213,7 @@ pub fn enu2aer(e : f64, n: f64,u :f64) -> (f64,f64,f64){
 
     let slant_range = (r*r+u*u).sqrt();
     let el = u.atan2(r);
-    let az = e.atan2(n) % (2.0*std::f64::consts::PI);
+    let az = e.atan2(n).rem_euclid(2.0*std::f64::consts::PI);
 
     (az,el,slant_range)
 
@@ -579,7 +579,7 @@ pub fn utc2gst(utc: [i32;6]) -> f64 {
     let gmst_sec = 67310.54841 + 3.164400184812866e+09 * t_ut1 + 0.093104 * t_ut1 * t_ut1 
                         - 6.2e-6 * t_ut1 * t_ut1 * t_ut1;
     
-    let gst = (gmst_sec * 2.0 * std::f64::consts::PI / 86400.0) % (2.0 * std::f64::consts::PI);
+    let gst = (gmst_sec * 2.0 * std::f64::consts::PI / 86400.0).rem_euclid(2.0 * std::f64::consts::PI);
     gst
 }
 
