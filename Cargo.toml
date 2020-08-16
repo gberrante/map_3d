@@ -1,6 +1,6 @@
 [package]
 name = "map_3d"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Giovan Battista Errante"]
 edition = "2018"
 description = "Library for 3D geographic coordinate transformation"
