@@ -594,6 +594,21 @@ pub fn fix(x : f64) -> f64 {
     out
 }
 
+/// Earth radius (m)
+pub const EARTH_RADIUS: f64 = 6371E3_f64;
+
+/// Returns distance (m) between two decimal degrees coordinates:: 
+/// coord1: (lat,lon), coord2: (lat, lon)
+pub fn distance (coord1: (f64,f64), coord2: (f64,f64)) -> f64 {
+    let dphi = deg2rad(coord2.0) - deg2rad(coord1.0);
+    let d_lambda = deg2rad(coord2.1) - deg2rad(coord1.1);
+    let a: f64 = (dphi / 2.0_f64).sin().powf(2.0_f64) 
+        + deg2rad(coord1.0).cos() * deg2rad(coord2.0).cos() 
+            * (d_lambda/2.0_f64).sin().powf(2.0_f64);
+    let c = 2.0_f64 * a.powf(0.5_f64).atan2((1.0-a).powf(0.5_f64));
+    EARTH_RADIUS * c
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1030,6 +1045,30 @@ mod tests {
         assert!((e-eref).abs()<1e-3);
         assert!((n-nref).abs()<1e-3);
         assert!((d-dref).abs()<1e-3);
+    }
+
+    #[test]
+    fn test_distance_calculation() {
+        let new_york = (40.730610,-73.935242);
+        let paris = (48.856614, 2.3522219);
+        let buenos_aires = (-34.603722, -58.381592);
+        let sydney = (-33.867487, 151.20699);
+        // TEST 1
+        let expected_km = 5831.0_f64; 
+        let d_km = distance(new_york, paris) / 1000.0_f64;
+        assert!((expected_km - d_km).abs() < 1.0);
+        // TEST2
+        let expected_km = 8527.0_f64; 
+        let d_km = distance(new_york, buenos_aires) / 1000.0_f64;
+        assert!((expected_km - d_km).abs() < 1.0);
+        // TEST3
+        let expected_km = 15990.0_f64; 
+        let d_km = distance(new_york, sydney) / 1000.0_f64;
+        assert!((expected_km - d_km).abs() < 10.0);
+        // TEST4
+        let expected_km = 11050.0_f64; 
+        let d_km = distance(buenos_aires, paris) / 1000.0_f64;
+        assert!((expected_km - d_km).abs() < 10.0);
     }
 }
 
