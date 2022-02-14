@@ -39,6 +39,4 @@ Additional functions:
 
 ## To-Do List:
 
-- implement functions for geodetic distances calculation
-- implement haversine functions
 - implement functions for right ascension and declination conversions
