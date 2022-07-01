@@ -17,7 +17,7 @@ The default units are:
 - [Greenwich Sidereal Time](https://www.cfa.harvard.edu/~jzhao/times.html)  [GST] for date and time
 
 We support 4 reference ellipsoids at the moment, and
-[WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84).
+[WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84)
 is the default one, obtained with `Reference::default()`.
 
 List of coordinates systems implemented in the functions:
