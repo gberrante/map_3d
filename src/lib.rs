@@ -565,7 +565,7 @@ impl Reference {
     }
 }
 
-/// Returns the normal radius based for given latitude
+/// Returns the normal radius based on given latitude
 /// and desired reference frame
 pub fn get_radius_normal(lat: f64, r_ellips: Reference)->f64 {
     let (major,_,_,squared_eccentricity) = r_ellips.parameters();
