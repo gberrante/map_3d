@@ -16,7 +16,9 @@ The default units are:
 - Meters  [m] for linear variables
 - [Greenwich Sidereal Time](https://www.cfa.harvard.edu/~jzhao/times.html)  [GST] for date and time
 
-The default reference ellipsoid is the [WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84)
+We support 4 reference ellipsoids at the moment, and
+[WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84).
+is the default one, obtained with `Reference::default()`.
 
 List of coordinates systems implemented in the functions:
 
@@ -34,8 +36,7 @@ Additional functions:
 - 3x3 Matrix - 3x1 column multiplication
 - 3x3 Matrix transpose
 - f64 round towards zero 
-
-
+- projected distance (`Haversine` formula) between two coordinates (lat, lon, in decimal degrees)
 
 ## To-Do List:
 

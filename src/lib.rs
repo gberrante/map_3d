@@ -1,17 +1,21 @@
+//! map_3d: geographic coordinates conversions
+
 /// Returns the tuple (x,y,z) of coordinates in the ECEF system
+/// with desired reference frame.
 /// 
 /// ## Inputs:
 /// - lat = latitude [rad]
 /// - lon = longitude [rad]
 /// - alt = altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - x = x ECEF coordinate [m]
 /// - y = y ECEF coordinate [m]
 /// - z = z ECEF coordinate [m]
-pub fn geodetic2ecef(lat: f64, lon: f64, alt: f64) -> (f64,f64,f64){
-    let n = get_radius_normal(lat);
-    let (major,minor,_,_) = wgs84();
+pub fn geodetic2ecef(lat: f64, lon: f64, alt: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let n = get_radius_normal(lat, r_ellips);
+    let (major,minor,_,_) = r_ellips.parameters();
 
     let x = (n + alt) * lat.cos() * lon.cos();
     let y = (n + alt) * lat.cos() * lon.sin();
@@ -34,8 +38,8 @@ pub fn geodetic2ecef(lat: f64, lon: f64, alt: f64) -> (f64,f64,f64){
 /// - az = azimuth angle [rad] of input geodetic location from reference geodetic location
 /// - el = elevation angle [rad] of input geodetic location from reference geodetic location
 /// - slant_range = slant range [m] of input geodetic location from reference geodetic location
-pub fn geodetic2aer(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
-    let (e,n,u) = geodetic2enu(lat,lon,alt,lat0,lon0,alt0);
+pub fn geodetic2aer(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let (e,n,u) = geodetic2enu(lat,lon,alt,lat0,lon0,alt0,r_ellips);
     let (az,el,slant_range) = enu2aer(e, n, u);
 
     (az,el,slant_range)
@@ -55,9 +59,9 @@ pub fn geodetic2aer(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64
 /// - e = east coordinate [m] of input geodetic location from reference geodetic location
 /// - n = north coordinate [m] of input geodetic location from reference geodetic location
 /// - u = up coordinate [m] of input geodetic location from reference geodetic location
-pub fn geodetic2enu(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
-    let (x1,y1,z1) = geodetic2ecef(lat, lon, alt);
-    let (x2,y2,z2) = geodetic2ecef(lat0, lon0, alt0);
+pub fn geodetic2enu(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let (x1,y1,z1) = geodetic2ecef(lat, lon, alt, r_ellips);
+    let (x2,y2,z2) = geodetic2ecef(lat0, lon0, alt0, r_ellips);
 
     let (e,n,u) = uvw2enu(x1-x2, y1-y2, z1-z2, lat0, lon0);
 
@@ -78,8 +82,8 @@ pub fn geodetic2enu(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64
 /// - n = north coordinate [m] of input geodetic location from reference geodetic location
 /// - e = east coordinate [m] of input geodetic location from reference geodetic location
 /// - d = down coordinate [m] of input geodetic location from reference geodetic location
-pub fn geodetic2ned(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
-    let enu =  geodetic2enu(lat, lon, alt, lat0, lon0, alt0);
+pub fn geodetic2ned(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let enu =  geodetic2enu(lat, lon, alt, lat0, lon0, alt0, r_ellips);
     (enu.1,enu.0,-enu.2)
 }
 
@@ -97,9 +101,9 @@ pub fn geodetic2ned(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64
 /// - x = x ECEF coordinate [m]
 /// - y = y ECEF coordinate [m]
 /// - z = z ECEF coordinate [m]
-pub fn aer2ecef(az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,f64,f64){
+pub fn aer2ecef(az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference)-> (f64,f64,f64){
 
-    let (x0,y0,z0) = geodetic2ecef(lat0, lon0, alt0);
+    let (x0,y0,z0) = geodetic2ecef(lat0, lon0, alt0, r_ellips);
     let (e,n,u) = aer2enu(az,el,slant_range);
     let (dx,dy,dz) = enu2uvw(e,n,u,lat0,lon0);
     (x0+dx,y0+dy,z0+dz)
@@ -135,8 +139,8 @@ pub fn aer2enu(az : f64, el: f64,slant_range :f64) -> (f64,f64,f64){
 /// - x = x ECI coordinate [m]
 /// - y = y ECI coordinate [m]
 /// - z = z ECI coordinate [m]
-pub fn aer2eci(gst :f64, az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
-    let (x1,y1,z1) = aer2ecef(az, el, slant_range, lat0, lon0, alt0);
+pub fn aer2eci(gst :f64, az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let (x1,y1,z1) = aer2ecef(az, el, slant_range, lat0, lon0, alt0, r_ellips);
     ecef2eci(gst, x1, y1, z1)
 }
 
@@ -170,9 +174,9 @@ pub fn aer2ned(az : f64, el: f64,slant_range :f64) -> (f64,f64,f64){
 /// - lat = input latitude [rad]
 /// - lon = input longitude [rad]
 /// - alt = input altitude [m]
-pub fn aer2geodetic(az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,f64,f64) {
-    let (x,y,z) = aer2ecef(az, el, slant_range, lat0, lon0, alt0);
-    ecef2geodetic(x,y,z)
+pub fn aer2geodetic(az : f64, el: f64,slant_range :f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference)-> (f64,f64,f64) {
+    let (x,y,z) = aer2ecef(az, el, slant_range, lat0, lon0, alt0, r_ellips);
+    ecef2geodetic(x,y,z,r_ellips)
 }
 
 /// Returns the tuple (u,v,w) of coordinates in the local vector system
@@ -233,8 +237,8 @@ pub fn enu2aer(e : f64, n: f64,u :f64) -> (f64,f64,f64){
 /// - x = x ECEF coordinate [m]
 /// - y = y ECEF coordinate [m]
 /// - z = z ECEF coordinate [m]
-pub fn enu2ecef(e : f64, n: f64,u :f64, lat0: f64, lon0: f64, alt0 : f64) -> (f64,f64,f64){
-    let (x0,y0,z0) = geodetic2ecef(lat0, lon0, alt0);
+pub fn enu2ecef(e : f64, n: f64, u: f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let (x0,y0,z0) = geodetic2ecef(lat0, lon0, alt0, r_ellips);
     let (dx,dy,dz) = enu2uvw(e, n, u, lat0, lon0);
 
     (x0+dx,y0+dy,z0+dz)
@@ -253,9 +257,9 @@ pub fn enu2ecef(e : f64, n: f64,u :f64, lat0: f64, lon0: f64, alt0 : f64) -> (f6
 /// - lat = latitude [rad]
 /// - lon = longitude [rad]
 /// - alt = altitude [m]
-pub fn enu2geodetic(e : f64, n: f64,u :f64, lat0: f64, lon0: f64, alt0 : f64) -> (f64,f64,f64){
-    let (x,y,z) = enu2ecef(e, n, u, lat0, lon0, alt0);
-    let (lat,lon,alt) = ecef2geodetic(x, y, z);
+pub fn enu2geodetic(e : f64, n: f64,u :f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let (x,y,z) = enu2ecef(e, n, u, lat0, lon0, alt0, r_ellips);
+    let (lat,lon,alt) = ecef2geodetic(x, y, z, r_ellips);
 
     (lat,lon,alt)
 }
@@ -278,19 +282,20 @@ pub fn ecef2eci(gst :f64,x: f64, y: f64, z: f64) -> (f64,f64,f64){
 }
 
 /// Returns the tuple (latitude,longitude,altitude) of coordinates in the Geodetic system
+/// with desired reference frame.
 /// 
 /// ## Inputs:
 /// - x = x ECEF coordinate [m]
 /// - y = y ECEF coordinate [m]
 /// - z = z ECEF coordinate [m]
+/// - r_ellips = reference ellipsoid, defaults to WGS84 
 /// 
 /// ## Outputs:
 /// - lat = latitude [rad]
 /// - lon = longitude [rad]
 /// - alt = altitude [m]
-pub fn ecef2geodetic(x: f64, y: f64, z: f64) -> (f64,f64,f64){
-    let major = wgs84().0;
-    let minor = wgs84().1;
+pub fn ecef2geodetic(x: f64, y: f64, z: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let (major, minor, _,_) = r_ellips.parameters();
 
     let r = (x*x+y*y+z*z).sqrt();
     let e = (major*major-minor*minor).sqrt();
@@ -336,8 +341,8 @@ pub fn ecef2geodetic(x: f64, y: f64, z: f64) -> (f64,f64,f64){
 /// - e = east coordinate [m] of input ECEF location from reference geodetic location
 /// - n = north coordinate [m] of input ECEF location from reference geodetic location
 /// - u = up coordinate [m] of input ECEF location from reference geodetic location
-pub fn ecef2enu(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,f64,f64){
-    let (x0,y0,z0) = geodetic2ecef(lat0, lon0, alt0);
+pub fn ecef2enu(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference)-> (f64,f64,f64){
+    let (x0,y0,z0) = geodetic2ecef(lat0, lon0, alt0,r_ellips);
     let (e,n,u) = uvw2enu(x-x0,y-y0,z-z0,lat0,lon0);
     (e,n,u)
 }
@@ -356,8 +361,8 @@ pub fn ecef2enu(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,
 /// - n = north coordinate [m] of input location from reference geodetic location
 /// - e = east coordinate [m] of input location from reference geodetic location
 /// - d = down coordinate [m] of input location from reference geodetic location
-pub fn ecef2ned(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,f64,f64){
-    let enu = ecef2enu(x, y, z, lat0, lon0, alt0);
+pub fn ecef2ned(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference)-> (f64,f64,f64){
+    let enu = ecef2enu(x, y, z, lat0, lon0, alt0, r_ellips);
     (enu.1,enu.0,-enu.2)
 }
 
@@ -396,8 +401,8 @@ pub fn uvw2enu(u : f64, v: f64,w :f64, lat0: f64, lon0: f64) -> (f64,f64,f64){
 /// - az = azimuth angle [rad] of input location from reference geodetic location
 /// - el = elevation angle [rad] of input location from reference geodetic location
 /// - slant_range = slant range [m] of input location from reference geodetic location
-pub fn ecef2aer(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,f64,f64){
-    let (e,n,u) = ecef2enu(x, y, z, lat0, lon0, alt0);
+pub fn ecef2aer(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference)-> (f64,f64,f64){
+    let (e,n,u) = ecef2enu(x, y, z, lat0, lon0, alt0, r_ellips);
     let (az,el,slant_range) = enu2aer(e,n,u);
 
     (az,el,slant_range)
@@ -417,9 +422,9 @@ pub fn ecef2aer(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64)-> (f64,
 /// - az = azimuth angle [rad] of input location from reference geodetic location
 /// - el = elevation angle [rad] of input location from reference geodetic location
 /// - slant_range = slant range [m] of input location from reference geodetic location
-pub fn eci2aer(gst :f64,x: f64, y: f64, z: f64, lat :f64, lon :f64, alt :f64)-> (f64,f64,f64){
+pub fn eci2aer(gst :f64,x: f64, y: f64, z: f64, lat :f64, lon :f64, alt :f64, r_ellips: Reference)-> (f64,f64,f64){
     let (x,y,z) = eci2ecef(gst, x, y, z);
-    let (az,el,slant_range) = ecef2aer(x, y, z, lat, lon, alt);
+    let (az,el,slant_range) = ecef2aer(x, y, z, lat, lon, alt, r_ellips);
     (az,el,slant_range)
 }
 
@@ -470,8 +475,8 @@ pub fn ned2aer(n : f64, e: f64,d :f64) -> (f64,f64,f64){
 /// - lat = latitude [rad]
 /// - lon = longitude [rad]
 /// - alt = altitude [m]
-pub fn ned2geodetic(n : f64, e: f64,d :f64, lat0: f64, lon0: f64, alt0: f64) -> (f64,f64,f64){
-    let geo = enu2geodetic(e, n, -d, lat0, lon0, alt0);
+pub fn ned2geodetic(n : f64, e: f64,d :f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let geo = enu2geodetic(e, n, -d, lat0, lon0, alt0, r_ellips);
     geo
 }
 
@@ -489,8 +494,8 @@ pub fn ned2geodetic(n : f64, e: f64,d :f64, lat0: f64, lon0: f64, alt0: f64) -> 
 /// - x = x ECEF coordinate [m]
 /// - y = y ECEF coordinate [m]
 /// - z = z ECEF coordinate [m]
-pub fn ned2ecef(n: f64,e : f64, d :f64, lat0: f64, lon0: f64, alt0 : f64) -> (f64,f64,f64){
-    let ecef = enu2ecef(e, n, -d, lat0, lon0, alt0);
+pub fn ned2ecef(n: f64,e : f64, d :f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Reference) -> (f64,f64,f64){
+    let ecef = enu2ecef(e, n, -d, lat0, lon0, alt0, r_ellips);
     ecef
 }
 
@@ -512,26 +517,58 @@ pub fn transpose3(x: [f64;9]) -> [f64;9] {
     [x[0],x[3],x[6],x[1],x[4],x[7],x[2],x[5],x[8]]
 }
 
-/// Returns the tuple representing the WGS84 data:
-/// 
-/// ## Outputs:
-/// - tuple.0 = semi-major axis 6378137.0 [m]
-/// - tuple.1 = semi-minor axis [m]
-/// - tuple.2 = flattening 1.0/298.2572235630 [-]
-/// - tuple.3 = squared eccentricity [rad^2]
-pub fn wgs84() -> (f64,f64,f64,f64) {
-
-    let major = 6378137.0;
-    let flattening = 1.0/298.2572235630;
-    let minor = major * (1.0 - flattening);
-    let ecc_sq = ((major*major)-(minor*minor))/(major*major);
-    
-    (major,minor,flattening,ecc_sq)
+#[derive(Debug, Copy, Clone)]
+pub enum Reference {
+    /// WGS84: GPS Reference frame  
+    /// semi-major axis: 6378137.0 [m]  
+    /// flattening: 1.0/298.2572235630
+    Wgs84,
+    /// ZP90: Glonass Reference frame  
+    /// semi-major axis: 6378136.0 [m]  
+    /// flattening: 1/298.257839303
+    Zp90,
+    /// BDC: Beidou Coordinate System  
+    /// semi-major axis: 6378137.0 [m]  
+    /// flattening: 1/298.257222101
+    Bdc,
+    /// GRS80 reference ellipsoid  
+    /// semi-major axis: 6378137.0 [m]  
+    /// flattening: 1.0/298.257222101
+    Grs80,
 }
 
-/// Returns the normal radius based on input latitude
-pub fn get_radius_normal(lat: f64)->f64 {
-    let (major,_,_,squared_eccentricity) = wgs84();
+impl Default for Reference {
+    fn default() -> Reference {
+        Reference::Wgs84
+    }
+}
+
+impl Reference {
+    /// Returns the tuple representing the Reference frame.
+    /// 
+    /// ## Outputs:
+    /// - tuple.0 = semi-major axis [m]
+    /// - tuple.1 = semi-minor axis [m]
+    /// - tuple.2 = flattening [-]
+    /// - tuple.3 = squared eccentricity [rad^2]
+    pub fn parameters(&self) -> (f64,f64,f64,f64) {
+        let (major, flattening): (f64, f64) = match self {
+            Reference::Wgs84 => (6378137.0, 1.0/298.257223563),
+            Reference::Zp90 =>  (6378136.0, 1.0/298.257839303),
+            Reference::Bdc =>   (6378137.0, 1.0/298.257222101),
+            Reference::Grs80 => (6378137.0, 1.0/298.2572221009),
+        };
+
+        let minor = major * (1.0 - flattening);
+        let ecc_sq = ((major*major)-(minor*minor))/(major*major);
+        (major,minor,flattening,ecc_sq)
+    }
+}
+
+/// Returns the normal radius based for given latitude
+/// and desired reference frame
+pub fn get_radius_normal(lat: f64, r_ellips: Reference)->f64 {
+    let (major,_,_,squared_eccentricity) = r_ellips.parameters();
     major/((1.0-squared_eccentricity*lat.sin()*lat.sin()).sqrt())
 }
 
@@ -667,7 +704,7 @@ mod tests {
         let lon = deg2rad(91.38733072);
         let alt = 4031.0;
 
-        let (x,y,z) = geodetic2ecef(lat,lon,alt);
+        let (x,y,z) = geodetic2ecef(lat,lon,alt, Reference::default());
 
         let xref = -1.337281037300386e+05;
         let yref = 5.521796910920261e+06;
@@ -693,7 +730,7 @@ mod tests {
         let elref = deg2rad(69.999999999945540);
         let rangeref = 1000.0;
 
-        let (a,e,r) = geodetic2aer(lat, lon, alt, lat0, lon0, alt0);
+        let (a,e,r) = geodetic2aer(lat, lon, alt, lat0, lon0, alt0, Reference::default());
 
         assert!((a-azref).abs()<1e-3);
         assert!((e-elref).abs()<1e-3);
@@ -714,7 +751,7 @@ mod tests {
         let nref = 2.868422278521820e+02;
         let uref = 9.396926207845534e+02;
 
-        let (e,n,u) = geodetic2enu(lat, lon, alt, lat0, lon0, alt0);
+        let (e,n,u) = geodetic2enu(lat, lon, alt, lat0, lon0, alt0, Reference::default());
 
         assert!((e-eref).abs()<1e-3);
         assert!((n-nref).abs()<1e-3);
@@ -731,7 +768,7 @@ mod tests {
         let el = deg2rad(70.0);
         let slant_range = 1000.0;
 
-        let (x,y,z) = aer2ecef(az,el,slant_range,lat0,lon0,alt0);
+        let (x,y,z) = aer2ecef(az,el,slant_range,lat0,lon0,alt0, Reference::default());
 
 
         let xref = 6.609301927610816e+05;
@@ -775,7 +812,7 @@ mod tests {
         let yref = -4.836588977863766e+07;
         let zref = -3.143285462295778e+07;
 
-        let (x,y,z) = aer2eci(gst, az, el, slant_range, lat0, lon0, alt0);
+        let (x,y,z) = aer2eci(gst, az, el, slant_range, lat0, lon0, alt0, Reference::default());
 
         assert!((x-xref).abs()<1e-3);
         assert!((y-yref).abs()<1e-3);
@@ -797,7 +834,7 @@ mod tests {
         let altref = 1.139701799575106e+03;
         
 
-        let (lat,lon,alt) = aer2geodetic(az, el, slant_range, lat0, lon0, alt0);
+        let (lat,lon,alt) = aer2geodetic(az, el, slant_range, lat0, lon0, alt0, Reference::default());
 
         assert!((lat-latref).abs()<1e-8);
         assert!((lon-lonref).abs()<1e-8);
@@ -834,7 +871,7 @@ mod tests {
         let yref = -4.701424222957011e+06;
         let zref = 4.246579604632881e+06;
         
-        let (x,y,z) = enu2ecef(e, n, u, lat0, lon0, alt0);
+        let (x,y,z) = enu2ecef(e, n, u, lat0, lon0, alt0, Reference::default());
 
         assert!((x-xref).abs()<1e-3);
         assert!((y-yref).abs()<1e-3);
@@ -854,7 +891,7 @@ mod tests {
         let lonref = deg2rad(-82.0);
         let altref = 1.990000000007368e+02;
 
-        let (lat,lon,alt) = enu2geodetic(e, n, u, lat0, lon0, alt0);
+        let (lat,lon,alt) = enu2geodetic(e, n, u, lat0, lon0, alt0, Reference::default());
 
         assert!((lat-latref).abs()<1e-8);
         assert!((lon-lonref).abs()<1e-8);
@@ -867,15 +904,15 @@ mod tests {
         let lonref = deg2rad(91.38733072);
         let altref = 4031.0;
 
-        let (x,y,z) = geodetic2ecef(latref, lonref, altref);
-        let (lat,lon,alt) = ecef2geodetic(x, y, z);
+        let (x,y,z) = geodetic2ecef(latref, lonref, altref, Reference::default());
+        let (lat,lon,alt) = ecef2geodetic(x, y, z, Reference::default());
         
         assert!((lat-latref).abs()<1e-8);
         assert!((lon-lonref).abs()<1e-8);
         assert!((alt-altref).abs()<1e-8);
 
-        let (x,y,z) = geodetic2ecef(latref, lonref, altref-5000.0);
-        let (lat,lon,alt) = ecef2geodetic(x, y, z);
+        let (x,y,z) = geodetic2ecef(latref, lonref, altref-5000.0, Reference::default());
+        let (lat,lon,alt) = ecef2geodetic(x, y, z, Reference::default());
         
         assert!((lat-latref).abs()<1e-8);
         assert!((lon-lonref).abs()<1e-8);
@@ -891,8 +928,8 @@ mod tests {
         let nref = 2.868422200000000e+02;
         let uref = 9.396926200000000e+02;
         
-        let (x,y,z) = enu2ecef(eref, nref, uref, lat0, lon0, alt0);
-        let (e,n,u)= ecef2enu(x, y, z, lat0, lon0, alt0);
+        let (x,y,z) = enu2ecef(eref, nref, uref, lat0, lon0, alt0, Reference::default());
+        let (e,n,u)= ecef2enu(x, y, z, lat0, lon0, alt0, Reference::default());
 
         assert!((e-eref).abs()<1e-3);
         assert!((n-nref).abs()<1e-3);
@@ -909,8 +946,8 @@ mod tests {
         let elref = deg2rad(70.0);
         let rangeref = 1000.0;
 
-        let (x,y,z) = aer2ecef(azref, elref, rangeref, lat0, lon0, alt0);
-        let (az,el,range) = ecef2aer(x, y, z, lat0, lon0, alt0);
+        let (x,y,z) = aer2ecef(azref, elref, rangeref, lat0, lon0, alt0, Reference::default());
+        let (az,el,range) = ecef2aer(x, y, z, lat0, lon0, alt0, Reference::default());
 
         assert!((az-azref).abs()<1e-3);
         assert!((el-elref).abs()<1e-3);
@@ -928,8 +965,8 @@ mod tests {
         let lon0 = deg2rad(-80.5);
         let alt0 = 2.7;
 
-        let (x,y,z) = aer2eci(gst, azref, elref, rangeref, lat0, lon0, alt0);
-        let (az,el,range) = eci2aer(gst, x, y, z, lat0, lon0, alt0);
+        let (x,y,z) = aer2eci(gst, azref, elref, rangeref, lat0, lon0, alt0, Reference::default());
+        let (az,el,range) = eci2aer(gst, x, y, z, lat0, lon0, alt0, Reference::default());
 
         assert!((az-azref).abs()<1e-3);
         assert!((el-elref).abs()<1e-3);
@@ -949,7 +986,7 @@ mod tests {
         let lonref = deg2rad(-82.0);
         let altref = 1.990000000007368e+02;
 
-        let (lat,lon,alt) = ned2geodetic(n, e, d, lat0, lon0, alt0);
+        let (lat,lon,alt) = ned2geodetic(n, e, d, lat0, lon0, alt0, Reference::default());
 
         assert!((lat-latref).abs()<1e-8);
         assert!((lon-lonref).abs()<1e-8);
@@ -969,7 +1006,7 @@ mod tests {
         let nref = 0.0;
         let dref = 1.0;
 
-        let (n,e,d) = geodetic2ned(lat, lon, alt, lat0, lon0, alt0);
+        let (n,e,d) = geodetic2ned(lat, lon, alt, lat0, lon0, alt0, Reference::default());
     
         assert!((e-eref).abs()<1e-3);
         assert!((n-nref).abs()<1e-3);
@@ -1023,7 +1060,7 @@ mod tests {
         let yref = -4.701424222957011e+06;
         let zref = 4.246579604632881e+06;
         
-        let (x,y,z) = ned2ecef(n, e, d, lat0, lon0, alt0);
+        let (x,y,z) = ned2ecef(n, e, d, lat0, lon0, alt0, Reference::default());
 
         assert!((x-xref).abs()<1e-3);
         assert!((y-yref).abs()<1e-3);
@@ -1039,8 +1076,8 @@ mod tests {
         let nref = 2.868422200000000e+02;
         let dref = -9.396926200000000e+02;
         
-        let (x,y,z) = ned2ecef(nref, eref, dref, lat0, lon0, alt0);
-        let (n,e,d)= ecef2ned(x, y, z, lat0, lon0, alt0);
+        let (x,y,z) = ned2ecef(nref, eref, dref, lat0, lon0, alt0, Reference::default());
+        let (n,e,d)= ecef2ned(x, y, z, lat0, lon0, alt0, Reference::default());
 
         assert!((e-eref).abs()<1e-3);
         assert!((n-nref).abs()<1e-3);
