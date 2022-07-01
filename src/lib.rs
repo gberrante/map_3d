@@ -1068,6 +1068,15 @@ mod tests {
     }
 
     #[test]
+    fn test_ellipsoid_references() {
+        let (a, b, f, e) = Reference::Wgs84.parameters();
+        assert!((a-6378137.0).abs() < 1E-6);
+        assert!((b-6356752.314245).abs() < 1E-6);
+        assert!((1.0/f-298.257223563).abs() < 1E-6);
+        assert!((e-6.6943799E-3_f64).abs() < 1E-6);
+    }
+
+    #[test]
     fn test_ecef2ned() {
         let lat0 = deg2rad(42.0);
         let lon0 = deg2rad(-82.0);
@@ -1108,6 +1117,3 @@ mod tests {
         assert!((expected_km - d_km).abs() < 10.0);
     }
 }
-
-
-    
