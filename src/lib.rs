@@ -1074,6 +1074,21 @@ mod tests {
         assert!((b-6356752.314245).abs() < 1E-6);
         assert!((1.0/f-298.257223563).abs() < 1E-6);
         assert!((e-6.6943799E-3_f64).abs() < 1E-6);
+        let (a, b, f, e) = Reference::Zp90.parameters();
+        assert!((a-6378136.0).abs() < 1E-6);
+        assert!((b-a*(1.0-f)).abs() < 1E-6);
+        assert!((1.0/f-298.257839303).abs() < 1E-6);
+        assert!((e-(f*(2.0-f))) < 1E-6);
+        let (a, b, f, e) = Reference::Grs80.parameters();
+        assert!((a-6378137.0).abs() < 1E-6);
+        assert!((b-a*(1.0-f)).abs() < 1E-6);
+        assert!((1.0/f-298.257222101).abs() < 1E-6);
+        assert!((e-(f*(2.0-f))) < 1E-6);
+        let (a, b, f, e) = Reference::Bdc.parameters();
+        assert!((a-6378137.0).abs() < 1E-6);
+        assert!((b-a*(1.0-f)).abs() < 1E-6);
+        assert!((1.0/f-298.257222101).abs() < 1E-6);
+        assert!((e-(f*(2.0-f))) < 1E-6);
     }
 
     #[test]
