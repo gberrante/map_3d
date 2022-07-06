@@ -33,6 +33,7 @@ pub fn geodetic2ecef(lat: f64, lon: f64, alt: f64, r_ellips: Ellipsoid) -> (f64,
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - az = azimuth angle [rad] of input geodetic location from reference geodetic location
@@ -54,6 +55,7 @@ pub fn geodetic2aer(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - e = east coordinate [m] of input geodetic location from reference geodetic location
@@ -77,6 +79,7 @@ pub fn geodetic2enu(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - n = north coordinate [m] of input geodetic location from reference geodetic location
@@ -96,6 +99,7 @@ pub fn geodetic2ned(lat: f64, lon: f64, alt: f64,lat0: f64, lon0: f64, alt0: f64
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - x = x ECEF coordinate [m]
@@ -134,6 +138,7 @@ pub fn aer2enu(az : f64, el: f64,slant_range :f64) -> (f64,f64,f64){
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - x = x ECI coordinate [m]
@@ -169,6 +174,7 @@ pub fn aer2ned(az : f64, el: f64,slant_range :f64) -> (f64,f64,f64){
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - lat = input latitude [rad]
@@ -232,6 +238,7 @@ pub fn enu2aer(e : f64, n: f64,u :f64) -> (f64,f64,f64){
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - x = x ECEF coordinate [m]
@@ -253,6 +260,7 @@ pub fn enu2ecef(e : f64, n: f64, u: f64, lat0: f64, lon0: f64, alt0: f64, r_elli
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// ## Outputs:
 /// - lat = latitude [rad]
 /// - lon = longitude [rad]
@@ -336,6 +344,7 @@ pub fn ecef2geodetic(x: f64, y: f64, z: f64, r_ellips: Ellipsoid) -> (f64,f64,f6
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - e = east coordinate [m] of input ECEF location from reference geodetic location
@@ -356,6 +365,7 @@ pub fn ecef2enu(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64, r_ellip
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - n = north coordinate [m] of input location from reference geodetic location
@@ -396,6 +406,7 @@ pub fn uvw2enu(u : f64, v: f64,w :f64, lat0: f64, lon0: f64) -> (f64,f64,f64){
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - az = azimuth angle [rad] of input location from reference geodetic location
@@ -417,6 +428,7 @@ pub fn ecef2aer(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64, r_ellip
 /// - lat = reference latitude [rad]
 /// - lon = reference longitude [rad]
 /// - alt = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - az = azimuth angle [rad] of input location from reference geodetic location
@@ -470,6 +482,7 @@ pub fn ned2aer(n : f64, e: f64,d :f64) -> (f64,f64,f64){
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - lat = latitude [rad]
@@ -489,6 +502,7 @@ pub fn ned2geodetic(n : f64, e: f64,d :f64, lat0: f64, lon0: f64, alt0: f64, r_e
 /// - lat0 = reference latitude [rad]
 /// - lon0 = reference longitude [rad]
 /// - alt0 = reference altitude [m]
+/// - r_ellips = reference ellipsoid, defaults ref. frame is WGS84 
 /// 
 /// ## Outputs:
 /// - x = x ECEF coordinate [m]
