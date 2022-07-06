@@ -16,9 +16,9 @@ The default units are:
 - Meters  [m] for linear variables
 - [Greenwich Sidereal Time](https://www.cfa.harvard.edu/~jzhao/times.html)  [GST] for date and time
 
-We support 4 reference ellipsoids at the moment, and
+We support several reference ellipsoids,
 [WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84)
-is the default one, obtained with `Reference::default()`.
+is defined as the default one the default one, obtained with `Ellipsoid::default()`.
 
 List of coordinates systems implemented in the functions:
 
