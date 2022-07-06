@@ -544,6 +544,18 @@ pub enum Ellipsoid {
     /// semi-major axis: 6378137.0 [m]  
     /// flattening: 1.0/298.257222101
     GRS80,
+    /// Bessel reference ellipsoid   
+    /// semi-major axis: 6377397.155 [m] 
+    /// flattening: 1.0/299.1528128
+    Bessel,
+    /// Airy reference ellipsoid   
+    /// semi-major axis: 6377563.396 [m]  
+    /// flattening: 1.0/299.3249646
+    Airy,
+    /// International reference ellipsoid   
+    /// semi-major axis: 6378388.0 [m]  
+    /// flattening: 1.0/297.0
+    International,
 }
 
 impl Default for Ellipsoid {
@@ -569,6 +581,9 @@ impl Ellipsoid {
             Ellipsoid::ZP90 =>  (6378136.0, 1.0/298.257839303),
             Ellipsoid::BDC =>   (6378137.0, 1.0/298.257222101),
             Ellipsoid::GRS80 => (6378137.0, 1.0/298.2572221009),
+            Ellipsoid::Bessel =>(6377397.155, 299.1528128),
+            Ellipsoid::Airy  => (6377563.396, 299.3249646),
+            Ellipsoid::International => (6378388.0, 297.0),
         };
 
         let minor = major * (1.0 - flattening);
@@ -1109,6 +1124,15 @@ mod tests {
         assert!((a-6378137.0).abs() < 1E-6);
         assert!((b-a*(1.0-f)).abs() < 1E-6);
         assert!((1.0/f-298.257222101).abs() < 1E-6);
+        assert!((e-(f*(2.0-f))) < 1E-6);
+        let (a, b, f, e) = Ellipsoid::Bessel.parameters();
+        assert!((b-a*(1.0-f)).abs() < 1E-6);
+        assert!((e-(f*(2.0-f))) < 1E-6);
+        let (a, b, f, e) = Ellipsoid::International.parameters();
+        assert!((b-a*(1.0-f)).abs() < 1E-6);
+        assert!((e-(f*(2.0-f))) < 1E-6);
+        let (a, b, f, e) = Ellipsoid::Airy.parameters();
+        assert!((b-a*(1.0-f)).abs() < 1E-6);
         assert!((e-(f*(2.0-f))) < 1E-6);
     }
 
