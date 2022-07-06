@@ -522,24 +522,24 @@ pub enum Ellipsoid {
     /// WGS84: GPS Ellipsoid frame  
     /// semi-major axis: 6378137.0 [m]  
     /// flattening: 1.0/298.2572235630
-    Wgs84,
+    WGS84,
     /// ZP90: Glonass Ellipsoid frame  
     /// semi-major axis: 6378136.0 [m]  
     /// flattening: 1/298.257839303
-    Zp90,
+    ZP90,
     /// BDC: Beidou Coordinate System  
     /// semi-major axis: 6378137.0 [m]  
     /// flattening: 1/298.257222101
-    Bdc,
+    BDC,
     /// GRS80 reference ellipsoid  
     /// semi-major axis: 6378137.0 [m]  
     /// flattening: 1.0/298.257222101
-    Grs80,
+    GRS80,
 }
 
 impl Default for Ellipsoid {
     fn default() -> Ellipsoid {
-        Ellipsoid::Wgs84
+        Ellipsoid::WGS84
     }
 }
 
@@ -553,10 +553,10 @@ impl Ellipsoid {
     /// - tuple.3 = squared eccentricity [rad^2]
     pub fn parameters(&self) -> (f64,f64,f64,f64) {
         let (major, flattening): (f64, f64) = match self {
-            Ellipsoid::Wgs84 => (6378137.0, 1.0/298.257223563),
-            Ellipsoid::Zp90 =>  (6378136.0, 1.0/298.257839303),
-            Ellipsoid::Bdc =>   (6378137.0, 1.0/298.257222101),
-            Ellipsoid::Grs80 => (6378137.0, 1.0/298.2572221009),
+            Ellipsoid::WGS84 => (6378137.0, 1.0/298.257223563),
+            Ellipsoid::ZP90 =>  (6378136.0, 1.0/298.257839303),
+            Ellipsoid::BDC =>   (6378137.0, 1.0/298.257222101),
+            Ellipsoid::GRS80 => (6378137.0, 1.0/298.2572221009),
         };
 
         let minor = major * (1.0 - flattening);
@@ -1069,22 +1069,22 @@ mod tests {
 
     #[test]
     fn test_ellipsoid_references() {
-        let (a, b, f, e) = Ellipsoid::Wgs84.parameters();
+        let (a, b, f, e) = Ellipsoid::WGS84.parameters();
         assert!((a-6378137.0).abs() < 1E-6);
         assert!((b-6356752.314245).abs() < 1E-6);
         assert!((1.0/f-298.257223563).abs() < 1E-6);
         assert!((e-6.6943799E-3_f64).abs() < 1E-6);
-        let (a, b, f, e) = Ellipsoid::Zp90.parameters();
+        let (a, b, f, e) = Ellipsoid::ZP90.parameters();
         assert!((a-6378136.0).abs() < 1E-6);
         assert!((b-a*(1.0-f)).abs() < 1E-6);
         assert!((1.0/f-298.257839303).abs() < 1E-6);
         assert!((e-(f*(2.0-f))) < 1E-6);
-        let (a, b, f, e) = Ellipsoid::Grs80.parameters();
+        let (a, b, f, e) = Ellipsoid::GRS80.parameters();
         assert!((a-6378137.0).abs() < 1E-6);
         assert!((b-a*(1.0-f)).abs() < 1E-6);
         assert!((1.0/f-298.257222101).abs() < 1E-6);
         assert!((e-(f*(2.0-f))) < 1E-6);
-        let (a, b, f, e) = Ellipsoid::Bdc.parameters();
+        let (a, b, f, e) = Ellipsoid::BDC.parameters();
         assert!((a-6378137.0).abs() < 1E-6);
         assert!((b-a*(1.0-f)).abs() < 1E-6);
         assert!((1.0/f-298.257222101).abs() < 1E-6);
