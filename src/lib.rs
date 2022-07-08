@@ -550,8 +550,10 @@ pub enum Ellipsoid {
     /// semi-major axis: 6378136.0 [m] 
     /// flattening: 1/298.257839303
     PZ90,
-    /// BDC: Beidou Coordinate System   
-    /// semi-major axis: 6378137.0 [m] 
+    /// BDC, also known as CGCS2000,
+    /// is the reference frame used by the
+    /// Beidou constellation.  
+    /// Semi-major axis: 6378137.0 [m] 
     /// flattening: 1/298.257222101
     BDC,
     /// GRS80 reference ellipsoid  
