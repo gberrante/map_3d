@@ -546,10 +546,10 @@ pub enum Ellipsoid {
     /// WGS60: semi-major axis: 6378165.0 [m]    
     /// flattening: 1.0/298.3
     WGS60,
-    /// ZP90: Glonass Ellipsoid frame  
+    /// PZ90: Glonass Ellipsoid frame  
     /// semi-major axis: 6378136.0 [m] 
     /// flattening: 1/298.257839303
-    ZP90,
+    PZ90,
     /// BDC: Beidou Coordinate System   
     /// semi-major axis: 6378137.0 [m] 
     /// flattening: 1/298.257222101
@@ -592,7 +592,7 @@ impl Ellipsoid {
             Ellipsoid::WGS72 => (6378135.0, 1.0/298.26),
             Ellipsoid::WGS66 => (6378145.0, 1.0/298.25),
             Ellipsoid::WGS60 => (6378165.0, 1.0/298.3),
-            Ellipsoid::ZP90 =>  (6378136.0, 1.0/298.257839303),
+            Ellipsoid::PZ90 =>  (6378136.0, 1.0/298.257839303),
             Ellipsoid::BDC =>   (6378137.0, 1.0/298.257222101),
             Ellipsoid::GRS80 => (6378137.0, 1.0/298.2572221009),
             Ellipsoid::Bessel =>(6377397.155, 299.1528128),
@@ -1124,7 +1124,7 @@ mod tests {
         let (a, b, f, e) = Ellipsoid::WGS60.parameters();
         assert!((b-a*(1.0-f)).abs() < 1E-6);
         assert!((e-(f*(2.0-f))) < 1E-6);
-        let (a, b, f, e) = Ellipsoid::ZP90.parameters();
+        let (a, b, f, e) = Ellipsoid::PZ90.parameters();
         assert!((a-6378136.0).abs() < 1E-6);
         assert!((b-a*(1.0-f)).abs() < 1E-6);
         assert!((1.0/f-298.257839303).abs() < 1E-6);
