@@ -638,8 +638,8 @@ pub fn utc2gst(utc: [i32;6]) -> f64 {
     let s = utc[5] as f64;
 
     if month<3.0 {
-        year = year - 1.0;
-        month = month + 12.0;
+        year -= 1.0;
+        month += 12.0;
     }
 
     let a = fix(year/100.0);
