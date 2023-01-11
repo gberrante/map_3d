@@ -468,8 +468,7 @@ pub fn eci2ecef(gst :f64,x: f64, y: f64, z: f64)-> (f64,f64,f64){
 /// - el = elevation angle [rad] of input location from reference geodetic location
 /// - slant_range = slant range [m] of input location from reference geodetic location
 pub fn ned2aer(n : f64, e: f64,d :f64) -> (f64,f64,f64){
-    let aer = enu2aer(e, n, -d);
-    aer
+    enu2aer(e, n, -d)
 }
 
 /// Returns the tuple (latitude,longitude,altitude) of coordinates in the Geodetic system
@@ -488,8 +487,7 @@ pub fn ned2aer(n : f64, e: f64,d :f64) -> (f64,f64,f64){
 /// - lon = longitude [rad]
 /// - alt = altitude [m]
 pub fn ned2geodetic(n : f64, e: f64,d :f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Ellipsoid) -> (f64,f64,f64){
-    let geo = enu2geodetic(e, n, -d, lat0, lon0, alt0, r_ellips);
-    geo
+    enu2geodetic(e, n, -d, lat0, lon0, alt0, r_ellips)
 }
 
 /// Returns the tuple (x,y,z) of coordinates in the ECEF system
@@ -508,8 +506,7 @@ pub fn ned2geodetic(n : f64, e: f64,d :f64, lat0: f64, lon0: f64, alt0: f64, r_e
 /// - y = y ECEF coordinate [m]
 /// - z = z ECEF coordinate [m]
 pub fn ned2ecef(n: f64,e : f64, d :f64, lat0: f64, lon0: f64, alt0: f64, r_ellips: Ellipsoid) -> (f64,f64,f64){
-    let ecef = enu2ecef(e, n, -d, lat0, lon0, alt0, r_ellips);
-    ecef
+    enu2ecef(e, n, -d, lat0, lon0, alt0, r_ellips)
 }
 
 /// Returns the array result of 3-by-3-matrix that multiplies a 3-by-1 column array
@@ -658,8 +655,7 @@ pub fn utc2gst(utc: [i32;6]) -> f64 {
     let gmst_sec = 67310.54841 + 3.164400184812866e+09 * t_ut1 + 0.093104 * t_ut1 * t_ut1 
                         - 6.2e-6 * t_ut1 * t_ut1 * t_ut1;
     
-    let gst = (gmst_sec * 2.0 * std::f64::consts::PI / 86400.0).rem_euclid(2.0 * std::f64::consts::PI);
-    gst
+    (gmst_sec * 2.0 * std::f64::consts::PI / 86400.0).rem_euclid(2.0 * std::f64::consts::PI)
 }
 
 /// Return the round toward zero value of the input
