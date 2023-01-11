@@ -323,13 +323,12 @@ pub fn ecef2geodetic(x: f64, y: f64, z: f64, r_ellips: Ellipsoid) -> (f64,f64,f6
 
     let v1 = z - minor * beta.sin();
     let v2 = q - major*beta.cos();
-    let alt;
 
     let inside = (x*x/major/major)+(y*y/major/major)+(z*z/minor/minor)<1.0;
-    if inside {
-        alt = -(v1*v1+v2*v2).sqrt();
-    }else {
-        alt = (v1*v1+v2*v2).sqrt();
+    let alt = if inside {
+        -(v1*v1+v2*v2).sqrt()
+    } else {
+        (v1*v1+v2*v2).sqrt()
     };
 
     (lat,lon,alt)
