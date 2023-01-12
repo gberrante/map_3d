@@ -39,15 +39,8 @@ pub fn geodetic2ecef(lat: f64, lon: f64, alt: f64, r_ellips: Ellipsoid) -> (f64,
 /// - az = azimuth angle [rad] of input geodetic location from reference geodetic location
 /// - el = elevation angle [rad] of input geodetic location from reference geodetic location
 /// - slant_range = slant range [m] of input geodetic location from reference geodetic location
-pub fn geodetic2aer(
-    lat: f64,
-    lon: f64,
-    alt: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn geodetic2aer(lat: f64, lon: f64, alt: f64, lat0: f64, lon0: f64, alt0: f64,
+                    r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (e, n, u) = geodetic2enu(lat, lon, alt, lat0, lon0, alt0, r_ellips);
     let (az, el, slant_range) = enu2aer(e, n, u);
 
@@ -69,15 +62,8 @@ pub fn geodetic2aer(
 /// - e = east coordinate [m] of input geodetic location from reference geodetic location
 /// - n = north coordinate [m] of input geodetic location from reference geodetic location
 /// - u = up coordinate [m] of input geodetic location from reference geodetic location
-pub fn geodetic2enu(
-    lat: f64,
-    lon: f64,
-    alt: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn geodetic2enu(lat: f64, lon: f64, alt: f64, lat0: f64, lon0: f64, alt0: f64,
+                    r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (x1, y1, z1) = geodetic2ecef(lat, lon, alt, r_ellips);
     let (x2, y2, z2) = geodetic2ecef(lat0, lon0, alt0, r_ellips);
 
@@ -101,15 +87,8 @@ pub fn geodetic2enu(
 /// - n = north coordinate [m] of input geodetic location from reference geodetic location
 /// - e = east coordinate [m] of input geodetic location from reference geodetic location
 /// - d = down coordinate [m] of input geodetic location from reference geodetic location
-pub fn geodetic2ned(
-    lat: f64,
-    lon: f64,
-    alt: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn geodetic2ned(lat: f64, lon: f64, alt: f64, lat0: f64, lon0: f64, alt0: f64,
+                    r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let enu = geodetic2enu(lat, lon, alt, lat0, lon0, alt0, r_ellips);
     (enu.1, enu.0, -enu.2)
 }
@@ -129,15 +108,8 @@ pub fn geodetic2ned(
 /// - x = x ECEF coordinate [m]
 /// - y = y ECEF coordinate [m]
 /// - z = z ECEF coordinate [m]
-pub fn aer2ecef(
-    az: f64,
-    el: f64,
-    slant_range: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn aer2ecef(az: f64, el: f64, slant_range: f64, lat0: f64, lon0: f64, alt0: f64,
+                r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (x0, y0, z0) = geodetic2ecef(lat0, lon0, alt0, r_ellips);
     let (e, n, u) = aer2enu(az, el, slant_range);
     let (dx, dy, dz) = enu2uvw(e, n, u, lat0, lon0);
@@ -175,16 +147,8 @@ pub fn aer2enu(az: f64, el: f64, slant_range: f64) -> (f64, f64, f64) {
 /// - x = x ECI coordinate [m]
 /// - y = y ECI coordinate [m]
 /// - z = z ECI coordinate [m]
-pub fn aer2eci(
-    gst: f64,
-    az: f64,
-    el: f64,
-    slant_range: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn aer2eci(gst: f64, az: f64, el: f64, slant_range: f64, lat0: f64, lon0: f64, alt0: f64,
+               r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (x1, y1, z1) = aer2ecef(az, el, slant_range, lat0, lon0, alt0, r_ellips);
     ecef2eci(gst, x1, y1, z1)
 }
@@ -220,15 +184,8 @@ pub fn aer2ned(az: f64, el: f64, slant_range: f64) -> (f64, f64, f64) {
 /// - lat = input latitude [rad]
 /// - lon = input longitude [rad]
 /// - alt = input altitude [m]
-pub fn aer2geodetic(
-    az: f64,
-    el: f64,
-    slant_range: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn aer2geodetic(az: f64, el: f64, slant_range: f64, lat0: f64, lon0: f64, alt0: f64,
+                    r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (x, y, z) = aer2ecef(az, el, slant_range, lat0, lon0, alt0, r_ellips);
     ecef2geodetic(x, y, z, r_ellips)
 }
@@ -291,15 +248,8 @@ pub fn enu2aer(e: f64, n: f64, u: f64) -> (f64, f64, f64) {
 /// - x = x ECEF coordinate [m]
 /// - y = y ECEF coordinate [m]
 /// - z = z ECEF coordinate [m]
-pub fn enu2ecef(
-    e: f64,
-    n: f64,
-    u: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn enu2ecef(e: f64, n: f64, u: f64, lat0: f64, lon0: f64, alt0: f64,
+                r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (x0, y0, z0) = geodetic2ecef(lat0, lon0, alt0, r_ellips);
     let (dx, dy, dz) = enu2uvw(e, n, u, lat0, lon0);
 
@@ -320,15 +270,8 @@ pub fn enu2ecef(
 /// - lat = latitude [rad]
 /// - lon = longitude [rad]
 /// - alt = altitude [m]
-pub fn enu2geodetic(
-    e: f64,
-    n: f64,
-    u: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn enu2geodetic(e: f64, n: f64, u: f64, lat0: f64, lon0: f64, alt0: f64,
+                    r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (x, y, z) = enu2ecef(e, n, u, lat0, lon0, alt0, r_ellips);
     let (lat, lon, alt) = ecef2geodetic(x, y, z, r_ellips);
 
@@ -411,15 +354,8 @@ pub fn ecef2geodetic(x: f64, y: f64, z: f64, r_ellips: Ellipsoid) -> (f64, f64, 
 /// - e = east coordinate [m] of input ECEF location from reference geodetic location
 /// - n = north coordinate [m] of input ECEF location from reference geodetic location
 /// - u = up coordinate [m] of input ECEF location from reference geodetic location
-pub fn ecef2enu(
-    x: f64,
-    y: f64,
-    z: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn ecef2enu(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64,
+                r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (x0, y0, z0) = geodetic2ecef(lat0, lon0, alt0, r_ellips);
     let (e, n, u) = uvw2enu(x - x0, y - y0, z - z0, lat0, lon0);
     (e, n, u)
@@ -440,15 +376,8 @@ pub fn ecef2enu(
 /// - n = north coordinate [m] of input location from reference geodetic location
 /// - e = east coordinate [m] of input location from reference geodetic location
 /// - d = down coordinate [m] of input location from reference geodetic location
-pub fn ecef2ned(
-    x: f64,
-    y: f64,
-    z: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn ecef2ned(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64,
+                r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let enu = ecef2enu(x, y, z, lat0, lon0, alt0, r_ellips);
     (enu.1, enu.0, -enu.2)
 }
@@ -489,15 +418,8 @@ pub fn uvw2enu(u: f64, v: f64, w: f64, lat0: f64, lon0: f64) -> (f64, f64, f64) 
 /// - az = azimuth angle [rad] of input location from reference geodetic location
 /// - el = elevation angle [rad] of input location from reference geodetic location
 /// - slant_range = slant range [m] of input location from reference geodetic location
-pub fn ecef2aer(
-    x: f64,
-    y: f64,
-    z: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn ecef2aer(x: f64, y: f64, z: f64, lat0: f64, lon0: f64, alt0: f64,
+                r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (e, n, u) = ecef2enu(x, y, z, lat0, lon0, alt0, r_ellips);
     let (az, el, slant_range) = enu2aer(e, n, u);
 
@@ -519,16 +441,8 @@ pub fn ecef2aer(
 /// - az = azimuth angle [rad] of input location from reference geodetic location
 /// - el = elevation angle [rad] of input location from reference geodetic location
 /// - slant_range = slant range [m] of input location from reference geodetic location
-pub fn eci2aer(
-    gst: f64,
-    x: f64,
-    y: f64,
-    z: f64,
-    lat: f64,
-    lon: f64,
-    alt: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn eci2aer(gst: f64, x: f64, y: f64, z: f64, lat: f64, lon: f64, alt: f64,
+               r_ellips: Ellipsoid) -> (f64, f64, f64) {
     let (x, y, z) = eci2ecef(gst, x, y, z);
     let (az, el, slant_range) = ecef2aer(x, y, z, lat, lon, alt, r_ellips);
     (az, el, slant_range)
@@ -581,15 +495,8 @@ pub fn ned2aer(n: f64, e: f64, d: f64) -> (f64, f64, f64) {
 /// - lat = latitude [rad]
 /// - lon = longitude [rad]
 /// - alt = altitude [m]
-pub fn ned2geodetic(
-    n: f64,
-    e: f64,
-    d: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn ned2geodetic(n: f64, e: f64, d: f64, lat0: f64, lon0: f64, alt0: f64,
+                    r_ellips: Ellipsoid) -> (f64, f64, f64) {
     enu2geodetic(e, n, -d, lat0, lon0, alt0, r_ellips)
 }
 
@@ -608,15 +515,8 @@ pub fn ned2geodetic(
 /// - x = x ECEF coordinate [m]
 /// - y = y ECEF coordinate [m]
 /// - z = z ECEF coordinate [m]
-pub fn ned2ecef(
-    n: f64,
-    e: f64,
-    d: f64,
-    lat0: f64,
-    lon0: f64,
-    alt0: f64,
-    r_ellips: Ellipsoid,
-) -> (f64, f64, f64) {
+pub fn ned2ecef(n: f64, e: f64, d: f64, lat0: f64, lon0: f64, alt0: f64,
+                r_ellips: Ellipsoid) -> (f64, f64, f64) {
     enu2ecef(e, n, -d, lat0, lon0, alt0, r_ellips)
 }
 
@@ -959,16 +859,7 @@ mod tests {
         let yref = -4.836588977863766e+07;
         let zref = -3.143285462295778e+07;
 
-        let (x, y, z) = aer2eci(
-            gst,
-            az,
-            el,
-            slant_range,
-            lat0,
-            lon0,
-            alt0,
-            Ellipsoid::default(),
-        );
+        let (x, y, z) = aer2eci(gst, az, el, slant_range, lat0, lon0, alt0, Ellipsoid::default());
 
         assert!((x - xref).abs() < 1e-3);
         assert!((y - yref).abs() < 1e-3);
@@ -1102,15 +993,7 @@ mod tests {
         let elref = deg2rad(70.0);
         let rangeref = 1000.0;
 
-        let (x, y, z) = aer2ecef(
-            azref,
-            elref,
-            rangeref,
-            lat0,
-            lon0,
-            alt0,
-            Ellipsoid::default(),
-        );
+        let (x, y, z) = aer2ecef(azref, elref, rangeref, lat0, lon0, alt0, Ellipsoid::default());
         let (az, el, range) = ecef2aer(x, y, z, lat0, lon0, alt0, Ellipsoid::default());
 
         assert!((az - azref).abs() < 1e-3);
