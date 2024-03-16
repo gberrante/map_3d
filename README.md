@@ -37,7 +37,3 @@ Additional functions:
 - 3x3 Matrix transpose
 - f64 round towards zero 
 - projected distance (`Haversine` formula) between two coordinates (lat, lon, in decimal degrees)
-
-## To-Do List:
-
-- implement functions for right ascension and declination conversions
