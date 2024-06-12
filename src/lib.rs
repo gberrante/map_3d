@@ -625,13 +625,15 @@ pub fn get_radius_normal(lat: f64, r_ellips: Ellipsoid) -> f64 {
 }
 
 /// Returns the radians [rad] value of the decimal degree [deg] input
+#[deprecated(since = "0.1.6", note = "conversion from degrees to radians is natively supported. Use value.to_radians(). See https://doc.rust-lang.org/std/primitive.f64.html#method.to_radians")]
 pub fn deg2rad(x: f64) -> f64 {
-    x / 180.0 * std::f64::consts::PI
+    x.to_radians()
 }
 
 /// Returns the decimal degree [deg] value of the radians [rad] input
+#[deprecated(since = "0.1.6", note = "conversion from radians to degrees is natively supported. Use value.to_degrees(). See https://doc.rust-lang.org/std/primitive.f64.html#method.to_degrees")]
 pub fn rad2deg(x: f64) -> f64 {
-    x * 180.0 / std::f64::consts::PI
+    x.to_degrees()
 }
 
 /// Returns the GST time as f64
@@ -687,11 +689,11 @@ pub const EARTH_RADIUS: f64 = 6371E3_f64;
 /// Returns distance (m) between two decimal degrees coordinates::
 /// coord1: (lat,lon), coord2: (lat, lon)
 pub fn distance(coord1: (f64, f64), coord2: (f64, f64)) -> f64 {
-    let dphi = deg2rad(coord2.0) - deg2rad(coord1.0);
-    let d_lambda = deg2rad(coord2.1) - deg2rad(coord1.1);
+    let dphi = coord2.0.to_radians() - coord1.0.to_radians();
+    let d_lambda = coord2.1.to_radians() - coord1.1.to_radians();
     let a: f64 = (dphi / 2.0_f64).sin().powf(2.0_f64)
-        + deg2rad(coord1.0).cos()
-            * deg2rad(coord2.0).cos()
+        + coord1.0.to_radians().cos()
+            * coord2.0.to_radians().cos()
             * (d_lambda / 2.0_f64).sin().powf(2.0_f64);
     let c = 2.0_f64 * a.powf(0.5_f64).atan2((1.0 - a).powf(0.5_f64));
     EARTH_RADIUS * c
@@ -728,29 +730,9 @@ mod tests {
     }
 
     #[test]
-    fn test_deg2rad() {
-        assert!((deg2rad(0.0) - 0.0).abs() < 1e-4);
-        assert!((deg2rad(90.0) - std::f64::consts::PI / 2.0).abs() < 1e-4);
-        assert!((deg2rad(-90.0) + std::f64::consts::PI / 2.0).abs() < 1e-4);
-        assert!((deg2rad(45.0) - std::f64::consts::PI / 4.0).abs() < 1e-4);
-        assert!((deg2rad(270.0) - std::f64::consts::PI * 6.0 / 4.0).abs() < 1e-4);
-        assert!((deg2rad(360.0) - std::f64::consts::PI * 2.0).abs() < 1e-4);
-    }
-
-    #[test]
-    fn test_rad2deg() {
-        assert!((0.0 - rad2deg(0.0)).abs() < 1e-4);
-        assert!((90.0 - rad2deg(std::f64::consts::PI / 2.0)).abs() < 1e-4);
-        assert!((-90.0 + rad2deg(std::f64::consts::PI / 2.0)).abs() < 1e-4);
-        assert!((45.0 - rad2deg(std::f64::consts::PI / 4.0)).abs() < 1e-4);
-        assert!((270.0 - rad2deg(std::f64::consts::PI * 6.0 / 4.0)).abs() < 1e-4);
-        assert!((360.0 - rad2deg(std::f64::consts::PI * 2.0)).abs() < 1e-4);
-    }
-
-    #[test]
     fn test_geodetic2ecef() {
-        let lat = deg2rad(30.14988205);
-        let lon = deg2rad(91.38733072);
+        let lat = 30.14988205_f64.to_radians();
+        let lon = 91.38733072_f64.to_radians();
         let alt = 4031.0;
 
         let (x, y, z) = geodetic2ecef(lat, lon, alt, Ellipsoid::default());
@@ -766,16 +748,16 @@ mod tests {
 
     #[test]
     fn test_geodetic2aer() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
 
-        let lat = deg2rad(42.002581974253744);
-        let lon = deg2rad(-81.997751960067460);
+        let lat = 42.002581974253744_f64.to_radians();
+        let lon = -81.997751960067460_f64.to_radians();
         let alt = 1.139701799575106e+03;
 
-        let azref = deg2rad(32.999999999989740);
-        let elref = deg2rad(69.999999999945540);
+        let azref = 32.999999999989740_f64.to_radians();
+        let elref = 69.999999999945540_f64.to_radians();
         let rangeref = 1000.0;
 
         let (a, e, r) = geodetic2aer(lat, lon, alt, lat0, lon0, alt0, Ellipsoid::default());
@@ -787,12 +769,12 @@ mod tests {
 
     #[test]
     fn test_geodetic2enu() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
 
-        let lat = deg2rad(42.002581974253744);
-        let lon = deg2rad(-81.997751960067460);
+        let lat = 42.002581974253744_f64.to_radians();
+        let lon = -81.997751960067460_f64.to_radians();
         let alt = 1.139701799575106e+03;
 
         let eref = 1.862775208168244e+02;
@@ -808,12 +790,12 @@ mod tests {
 
     #[test]
     fn test_aer2ecef() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
 
-        let az = deg2rad(33.0);
-        let el = deg2rad(70.0);
+        let az = 33.0_f64.to_radians();
+        let el = 70.0_f64.to_radians();
         let slant_range = 1000.0;
 
         let (x, y, z) = aer2ecef(az, el, slant_range, lat0, lon0, alt0, Ellipsoid::default());
@@ -829,8 +811,8 @@ mod tests {
 
     #[test]
     fn test_aer2enu() {
-        let az = deg2rad(33.0);
-        let el = deg2rad(70.0);
+        let az = 33.0_f64.to_radians();
+        let el = 70.0_f64.to_radians();
         let slant_range = 1000.0;
 
         let eref = 1.862775208165935e+02;
@@ -846,13 +828,13 @@ mod tests {
 
     #[test]
     fn test_aer2eci() {
-        let az = deg2rad(162.55);
-        let el = deg2rad(55.12);
+        let az = 162.55_f64.to_radians();
+        let el = 55.12_f64.to_radians();
         let slant_range = 384013940.9;
         let gst = 4.501012562811752;
 
-        let lat0 = deg2rad(28.4);
-        let lon0 = deg2rad(-80.5);
+        let lat0 = 28.4_f64.to_radians();
+        let lon0 = -80.5_f64.to_radians();
         let alt0 = 2.7;
 
         let xref = -3.849714979138141e+08;
@@ -868,16 +850,16 @@ mod tests {
 
     #[test]
     fn test_aer2geodetic() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
 
-        let az = deg2rad(32.999999999989740);
-        let el = deg2rad(69.999999999945540);
+        let az = 32.999999999989740_f64.to_radians();
+        let el = 69.999999999945540_f64.to_radians();
         let slant_range = 1000.0;
 
-        let latref = deg2rad(42.002581974253744);
-        let lonref = deg2rad(-81.997751960067460);
+        let latref = 42.002581974253744_f64.to_radians();
+        let lonref = -81.997751960067460_f64.to_radians();
         let altref = 1.139701799575106e+03;
 
         let (lat, lon, alt) =
@@ -894,8 +876,8 @@ mod tests {
         let n = 2.868422200000000e+02;
         let u = 9.396926200000000e+02;
 
-        let azref = deg2rad(33.0);
-        let elref = deg2rad(70.0);
+        let azref = 33.0_f64.to_radians();
+        let elref = 70.0_f64.to_radians();
         let rangeref = 1000.0;
 
         let (az, el, range) = enu2aer(e, n, u);
@@ -907,8 +889,8 @@ mod tests {
 
     #[test]
     fn test_enu2ecef() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
         let e = 1.862775210000000e+02;
         let n = 2.868422200000000e+02;
@@ -927,15 +909,15 @@ mod tests {
 
     #[test]
     fn test_enu2geodetic() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
         let e = 0.0;
         let n = 0.0;
         let u = -1.0;
 
-        let latref = deg2rad(41.999999999999993);
-        let lonref = deg2rad(-82.0);
+        let latref = 41.999999999999993_f64.to_radians();
+        let lonref = -82.0_f64.to_radians();
         let altref = 1.990000000007368e+02;
 
         let (lat, lon, alt) = enu2geodetic(e, n, u, lat0, lon0, alt0, Ellipsoid::default());
@@ -947,8 +929,8 @@ mod tests {
 
     #[test]
     fn test_ecef2geodetic() {
-        let latref = deg2rad(30.14988205);
-        let lonref = deg2rad(91.38733072);
+        let latref = 30.14988205_f64.to_radians();
+        let lonref = 91.38733072_f64.to_radians();
         let altref = 4031.0;
 
         let (x, y, z) = geodetic2ecef(latref, lonref, altref, Ellipsoid::default());
@@ -968,8 +950,8 @@ mod tests {
 
     #[test]
     fn test_ecef2enu() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
         let eref = 1.862775210000000e+02;
         let nref = 2.868422200000000e+02;
@@ -985,12 +967,12 @@ mod tests {
 
     #[test]
     fn test_ecef2aer() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
 
-        let azref = deg2rad(33.0);
-        let elref = deg2rad(70.0);
+        let azref = 33.0_f64.to_radians();
+        let elref = 70.0_f64.to_radians();
         let rangeref = 1000.0;
 
         let (x, y, z) = aer2ecef(azref, elref, rangeref, lat0, lon0, alt0, Ellipsoid::default());
@@ -1003,13 +985,13 @@ mod tests {
 
     #[test]
     fn test_eci2aer() {
-        let azref = deg2rad(162.55);
-        let elref = deg2rad(55.12);
+        let azref = 162.55_f64.to_radians();
+        let elref = 55.12_f64.to_radians();
         let rangeref = 384013940.9;
         let gst = 4.501012562811752;
 
-        let lat0 = deg2rad(28.4);
-        let lon0 = deg2rad(-80.5);
+        let lat0 = 28.4_f64.to_radians();
+        let lon0 = -80.5_f64.to_radians();
         let alt0 = 2.7;
 
         let (x, y, z) = aer2eci(
@@ -1031,15 +1013,15 @@ mod tests {
 
     #[test]
     fn test_ned2geodetic() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
         let e = 0.0;
         let n = 0.0;
         let d = 1.0;
 
-        let latref = deg2rad(41.999999999999993);
-        let lonref = deg2rad(-82.0);
+        let latref = 41.999999999999993_f64.to_radians();
+        let lonref = -82.0_f64.to_radians();
         let altref = 1.990000000007368e+02;
 
         let (lat, lon, alt) = ned2geodetic(n, e, d, lat0, lon0, alt0, Ellipsoid::default());
@@ -1051,11 +1033,11 @@ mod tests {
 
     #[test]
     fn test_geodetic2ned() {
-        let lat = deg2rad(41.999999999999993);
-        let lon = deg2rad(-82.0);
+        let lat = 41.999999999999993_f64.to_radians();
+        let lon = -82.0_f64.to_radians();
         let alt = 1.990000000007368e+02;
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
 
         let eref = 0.0;
@@ -1071,8 +1053,8 @@ mod tests {
 
     #[test]
     fn test_aer2ned() {
-        let az = deg2rad(33.0);
-        let el = deg2rad(70.0);
+        let az = 33.0_f64.to_radians();
+        let el = 70.0_f64.to_radians();
         let slant_range = 1000.0;
 
         let eref = 1.862775208165935e+02;
@@ -1088,8 +1070,8 @@ mod tests {
 
     #[test]
     fn test_ned2aer() {
-        let az_ref = deg2rad(33.0);
-        let el_ref = deg2rad(70.0);
+        let az_ref = 33.0_f64.to_radians();
+        let el_ref = 70.0_f64.to_radians();
         let range_ref = 1000.0;
 
         let e = 1.862775208165935e+02;
@@ -1105,8 +1087,8 @@ mod tests {
 
     #[test]
     fn test_ned2ecef() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
         let e = 1.862775210000000e+02;
         let n = 2.868422200000000e+02;
@@ -1167,8 +1149,8 @@ mod tests {
 
     #[test]
     fn test_ecef2ned() {
-        let lat0 = deg2rad(42.0);
-        let lon0 = deg2rad(-82.0);
+        let lat0 = 42.0_f64.to_radians();
+        let lon0 = -82.0_f64.to_radians();
         let alt0 = 200.0;
         let eref = 1.862775210000000e+02;
         let nref = 2.868422200000000e+02;
