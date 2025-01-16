@@ -606,9 +606,9 @@ impl Ellipsoid {
             Ellipsoid::PZ90 => (6378136.0, 1.0 / 298.257839303),
             Ellipsoid::BDC => (6378137.0, 1.0 / 298.257222101),
             Ellipsoid::GRS80 => (6378137.0, 1.0 / 298.2572221009),
-            Ellipsoid::Bessel => (6377397.155, 299.1528128),
-            Ellipsoid::Airy => (6377563.396, 299.3249646),
-            Ellipsoid::International => (6378388.0, 297.0),
+            Ellipsoid::Bessel => (6377397.155, 1.0 / 299.1528128),
+            Ellipsoid::Airy => (6377563.396, 1.0 / 299.3249646),
+            Ellipsoid::International => (6378388.0, 1.0 / 297.0),
         };
 
         let minor = major * (1.0 - flattening);
