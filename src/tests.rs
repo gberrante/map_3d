@@ -536,3 +536,37 @@ fn test_distance_antipodal() {
     let d = distance((0.0, 0.0), (0.0, 180.0));
     assert!(d.is_finite());
 }
+
+#[test]
+fn test_geohash_known_points() {
+    let cities: Vec<(&str, f64, f64, usize, &str)> = vec![
+        ("Tokyo", 35.6897, 139.6922, 5, "xn774"),
+        ("London", 51.5074, -0.1278, 6, "gcpvj0"),
+        ("Washington DC", 38.8951, -77.0364, 7, "dqcjqbx"),
+        ("Brasília", -15.7975, -47.8919, 4, "6vjy"),
+        ("Canberra", -35.2809, 149.1300, 8, "r3dp3931"),
+        ("Seoul", 37.5665, 126.9780, 12, "wydm9qy89z5m"), //clamped to 12
+    ];
+
+    for (name, lat, lon, len, expected) in cities {
+        let result = geodetic2geohash(lat.to_radians(), lon.to_radians(), len);
+        assert_eq!(
+            result, expected,
+            "City {} failed. Expected {}, got {}",
+            name, expected, result
+        );
+        assert_eq!(result.len(), len, "Length mismatch for {}", name);
+    }
+}
+
+#[test]
+fn test_geohash_boundary_conditions() {
+    // Exact center (0,0) - Prime Meridian & Equator
+    // Degrees: (0.0, 0.0) -> "s000..."
+    let h_center = geodetic2geohash(0.0, 0.0, 1);
+    assert_eq!(h_center, "s");
+
+    // Exact North Pole
+    let h_pole = geodetic2geohash(std::f64::consts::PI / 2.0, 0.0, 5);
+    assert!(h_pole.len() == 5);
+}
