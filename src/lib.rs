@@ -829,52 +829,8 @@ pub fn distance(coord1: (f64, f64), coord2: (f64, f64)) -> f64 {
     EARTH_RADIUS * c
 }
 
-/// Returns the string geohash of the geodetic coordinates (latitude, longitude) with desired precision.
-/// Precision is clamped to the range [0, 12].
-/// ## Inputs:
-/// - lat = latitude [rad]
-/// - lon = longitude [rad]
-/// - precision = number of characters in the geohash string, defaults to 12
-///
-/// ## Outputs:
-/// - geohash string of the input geodetic coordinates with desired precision
-pub fn geodetic2geohash(lat: f64, lon: f64, precision: usize) -> String {
-    // Geohash typically uses degrees for latitude and longitude
-    let lat = lat.to_degrees();
-    let lon = lon.to_degrees();
-    let precision = precision.clamp(0, 12);
-
-    let mut lat_range = (-90.0, 90.0);
-    let mut lon_range = (-180.0, 180.0);
-    let mut bits = 0u8; // 5 bits per character
-    let mut hash = String::with_capacity(precision);
-
-    let charset = b"0123456789bcdefghjkmnpqrstuvwxyz";
-
-    for i in 0..(precision * 5) {
-        let is_even = i % 2 == 0;
-        let (val, range) = if is_even {
-            (lon, &mut lon_range)
-        } else {
-            (lat, &mut lat_range)
-        };
-
-        let mid = (range.0 + range.1) / 2.0;
-        bits <<= 1;
-        if val >= mid {
-            bits |= 1;
-            range.0 = mid;
-        } else {
-            range.1 = mid;
-        }
-
-        if (i + 1) % 5 == 0 {
-            hash.push(charset[bits as usize] as char);
-            bits = 0;
-        }
-    }
-    hash
-}
+// Module for geohashing
+pub mod geohash;
 
 // Module for unit tests
 #[cfg(test)]

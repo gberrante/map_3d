@@ -538,7 +538,7 @@ fn test_distance_antipodal() {
 }
 
 #[test]
-fn test_geohash_known_points() {
+fn test_geohash_encode() {
     let cities: Vec<(&str, f64, f64, usize, &str)> = vec![
         ("Tokyo", 35.6897, 139.6922, 5, "xn774"),
         ("London", 51.5074, -0.1278, 6, "gcpvj0"),
@@ -549,7 +549,7 @@ fn test_geohash_known_points() {
     ];
 
     for (name, lat, lon, len, expected) in cities {
-        let result = geodetic2geohash(lat.to_radians(), lon.to_radians(), len);
+        let result = geohash::encode(lat.to_radians(), lon.to_radians(), len);
         assert_eq!(
             result, expected,
             "City {} failed. Expected {}, got {}",
@@ -563,10 +563,28 @@ fn test_geohash_known_points() {
 fn test_geohash_boundary_conditions() {
     // Exact center (0,0) - Prime Meridian & Equator
     // Degrees: (0.0, 0.0) -> "s000..."
-    let h_center = geodetic2geohash(0.0, 0.0, 1);
+    let h_center = geohash::encode(0.0, 0.0, 1);
     assert_eq!(h_center, "s");
 
     // Exact North Pole
-    let h_pole = geodetic2geohash(std::f64::consts::PI / 2.0, 0.0, 5);
+    let h_pole = geohash::encode(std::f64::consts::PI / 2.0, 0.0, 5);
     assert!(h_pole.len() == 5);
+}
+
+#[test]
+fn test_geohash_decode() {
+    let geohash_str = "gcpvj0";
+    let (lat, lon, precision) = geohash::decode(geohash_str).unwrap();
+
+    let lat_cell_center_deg = lat.to_degrees();
+    let lon_cell_center_deg = lon.to_degrees();
+
+    println!(
+        "Decoded geohash '{}': lat = {:.6}, lon = {:.6}, precision = {}",
+        geohash_str, lat_cell_center_deg, lon_cell_center_deg, precision
+    );
+
+    assert!((lat_cell_center_deg - 51.506653).abs() < 0.00001);
+    assert!((lon_cell_center_deg - (-0.126343)).abs() < 0.00001);
+    assert_eq!(precision, geohash_str.len());
 }
